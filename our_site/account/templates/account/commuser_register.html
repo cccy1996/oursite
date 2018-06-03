@@ -1,0 +1,36 @@
+<form method="POST" action="{% url 'account:register' %}">
+    {% csrf_token %}
+    <table>
+        <tr>
+            <td>username:</td>
+            <td>
+                <input type="text" name="username">
+            </td>
+        </tr>
+        <tr>
+            <td>password:</td>
+            <td>
+                <input type="password" name="password">
+            </td>
+        </tr>
+        <tr>
+            <td>comfirm password:</td>
+            <td>
+                <input type="password" name="password_comfirm">
+            </td>
+        </tr>
+        <tr>
+            <td>email:</td>
+            <td>
+                <input type="email" name="email">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="submit" value="submit">
+            </td>
+        </tr>
+    </table>
+</form>
+{% if username_err is True%} please change a username {%endif%}
+{% if password_err is True%} please confirm your password {%endif%}
