@@ -1,11 +1,11 @@
 from django.db import models
-from account.models import Expertuser_realtion
+from account.models import Expertuser_relation
 
 class Composition(models.Model):
     comp_id = models.AutoField(primary_key=True)
     comp_name = models.CharField(max_length=50)
     upload_time = models.DateTimeField('composition uploaded time')
-    expert = models.ForeignKey(Expertuser_realtion, on_delete=models.CASCADE)
+    expert = models.ForeignKey(Expertuser_relation, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=9,decimal_places=1, default = 0)
 
 class Project(Composition):
