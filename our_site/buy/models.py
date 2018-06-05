@@ -5,7 +5,7 @@ from display.models import Composition
 # Create your models here.
 class Transaction(models.Model):
     trans_id = models.AutoField(primary_key=True)
-    app_date = models.DateField('application occured date')
+    app_date = models.DateTimeField('application occured date')
     trans_date = models.DateTimeField('transaction occured date')
     trans_user = models.ForeignKey(Commuser_relation, on_delete = False)
     trans_composition = models.ForeignKey(Composition, on_delete = False)

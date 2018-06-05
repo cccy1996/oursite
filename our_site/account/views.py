@@ -65,7 +65,8 @@ def expert_login(request):
 
 def commuser_profile(request):
     if request.user.is_authenticated:
-        return render(request, 'account/commuser_profile.html')
+        commuser = request.user.commuser_relation
+        return render(request, 'account/commuser_profile.html', {'commuser' : commuser})
     else:
         return HttpResponse("you are not login!")
 
