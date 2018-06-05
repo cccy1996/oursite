@@ -6,7 +6,7 @@ from django.http import HttpResponse
 
 def account_index(request):
     return render(request, 'account/index.html')
-
+ 
 def commuser_register(request):
     if request.method == 'GET':
         return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err': False})
@@ -29,7 +29,6 @@ def commuser_register(request):
             return redirect('/account/profile/')
         return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err' : True})
         #need a username duplicate check
-
 
 def commuser_login(request):
     if request.method  == 'GET':
@@ -94,3 +93,47 @@ def uesr_change_password(request):
                 return render(request, 'account/change_password.html', { 'old_password_err' : False, 'new_password_err' : True})
         else:
             return render(request, 'account/change_password.html', { 'old_password_err' : True, 'new_password_err' : False})
+
+def expert_register(request):
+    if request.method == 'GET':
+        return render(request, "account/expert_register.html", 
+                        {'password_err': False, 'username_err': False, 'identity_err': False})
+    elif request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        password_confirm = request.POST['password_confirm']
+        email = request.POST['email']
+        truename = request.POST['truename']
+        identity = request.POST['identity']
+    if password != password_confirm:
+        return render(request, 'account/expert_register.html', 
+                        {'password_err': True, 'username_err': False, 'identity_err': False})
+    got = User.objects.filter(username=username)
+    if (got.count() != 0):
+        return render(request, 'account/expert_register.html', 
+                        {'password_err': False, 'username_err': True, 'identity_err': False})
+    got = Expertuser_relation.objects.filter(user__username=truename)
+    if (got.count() != 0):
+        return render(request, 'account/expert_register.html', 
+                        {'password_err': False, 'username_err': False, 'identity_err': True})
+    new_user = User.objects.create_user(username, email = email, password = password)
+    new_user.save()
+    expert_profile = Expertuser_relation(user = new_user, name = truename, identity = identity)
+    expert_profile.save()
+    return redirect('/account/expert_profile/')
+                
+def expert_profile(request):
+    if request.user.is_authenticated:
+        user = request.user
+        try:
+            expert = user.expertuser_relation
+            return render(request, 'account/expert_profile.html',
+                        {'isexpert': True, 'expert': expert})
+        except Expertuser_relation.DoesNotExist:
+            return render(request, 'account/expert_profile.html',
+                        {'isexpert': False, 'expert': None})        
+    else:
+        return HttpResponse("you expert is not login")
+
+def expert_claim_homepage(request, homepagepk):
+    pass
