@@ -5,6 +5,9 @@ from .models import *
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db import transaction as database_transaction
+from django.utils import timezone
+from display.models import ExpertDetail
+from customerservice.models import ApplicationForHomepageClaiming
 
 def account_index(request):
     return render(request, 'account/index.html')
@@ -118,4 +121,26 @@ def expert_register(request):
         return redirect('/account/profile/')
                 
 def expert_claim_homepage(request, homepagepk):
-    pass
+    user = request.user
+    expert = user.expertuser_relation
+    try:
+        detail = expert.expertdetail
+        return HttpResponse("you've already had a homepage")
+    except ExpertDetail.DoesNotExist:
+        # this is the correct branch
+        try:
+            wanted = ExpertDetail.objects.get(pk=homepagepk)
+        except ExpertDetail.DoesNotExist:
+            return HttpResponse("this user doesn't have a home page")
+        if wanted.name != expert.name:
+            return HttpResponse("连名字都不一样")
+        apply = ApplicationForHomepageClaiming()
+        apply.expert = expert
+        apply.homepage = wanted
+        apply.date = timezone.now()
+        apply.state = 'S' # suspending
+        apply.save()
+
+        return redirect('/account/expert_profile/')
+
+    

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'search',
     'question',
     'message',
+    "customerservice",
 ]
 
 MIDDLEWARE = [

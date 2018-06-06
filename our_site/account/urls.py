@@ -12,4 +12,6 @@ urlpatterns = [
     path('changepasswd/', views.uesr_change_password, name = 'change_password'),
 
     path('expert_register/', views.expert_register, name = 'expert_register'),
+    path('expert_claim_homepage/<int:homepagepk>/', 
+            views.expert_claim_homepage, name = 'expert_claim_homepage'),
 ]
