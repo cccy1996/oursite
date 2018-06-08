@@ -12,6 +12,4 @@ urlpatterns = [
     path('changepasswd/', views.uesr_change_password, name = 'change_password'),
 
     path('expert_register/', views.expert_register, name = 'expert_register'),
-    path('expert_login/', views.expert_login, name='expert_login'),
-    path('expert_profile/', views.expert_profile, name = 'expert_profile'),
 ]

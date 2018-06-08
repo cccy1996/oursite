@@ -3,6 +3,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from .models import *
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required, permission_required
+from django.db import transaction as database_transaction
 
 def account_index(request):
     return render(request, 'account/index.html')
@@ -21,20 +23,22 @@ def commuser_register(request):
         except Exception:
             if password != password_comfirm:
                 return render(request, 'account/commuser_register.html', {'password_err': True, 'username_err': False})
-            new_user = User.objects.create_user(username, email = email, password = password)
-            new_user.save()
-            relation = Commuser_relation(user = new_user, credit = 0)
-            relation.save()
-            login(request, new_user)
-            return redirect('/account/profile/')
+            
+            with database_transaction.atomic():
+                new_user = User.objects.create_user(username, email = email, password = password)
+                new_user.user_permissions.add('account.commuser_permission')
+                new_user.save()
+                relation = Commuser_relation(user = new_user, credit = 0)
+                relation.save()
+                login(request, new_user)
+                return redirect('/account/profile/')
         return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err' : True})
         #need a username duplicate check
 
 def commuser_login(request):
     if request.method  == 'GET':
         if request.user.is_authenticated:
-            return redirect('/account/profile/')
-        else:
+            logout(request)
             return render(request, 'account/commuser_login.html', {'relog' : False})
     elif request.method == 'POST':
         username = request.POST['username']
@@ -46,29 +50,17 @@ def commuser_login(request):
         else:
             return render(request, 'account/commuser_login.html', {'relog' : True})
 
-def expert_login(request):
-    if request.method  == 'GET':
-        if request.user.is_authenticated:
-            return redirect('/account/expert_profile/')
-        else:
-            return render(request, 'account/expert_login.html', {'relog' : False})
-    elif request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username = username, password = password)
-        if user is not None:
-            login(request, user)
-            return redirect('/account/expert_profile/')
-        else:
-            return render(request, 'account/expert_login.html', {'relog' : True})
-
+@login_required(login_url = '/account/login/')
 def commuser_profile(request):
-    if request.user.is_authenticated:
+    if request.user.has_perm('account.commuser_permission'):
         commuser = request.user.commuser_relation
         return render(request, 'account/commuser_profile.html', {'commuser' : commuser})
+    elif request.user.has_perm('account.expert_permission'):
+        expert = request.user.expertuser_relation
+        return render(request, 'account/expert_profile.html',
+                    {'isexpert': True, 'expert': expert})
     else:
-        return HttpResponse("you are not login!")
-
+        return HttpResponse("error page")
 
 #this is a common way for both commuser and expert
 def user_logout(request):
@@ -117,24 +109,13 @@ def expert_register(request):
     if (got.count() != 0):
         return render(request, 'account/expert_register.html', 
                         {'password_err': False, 'username_err': False, 'identity_err': True})
-    new_user = User.objects.create_user(username, email = email, password = password)
-    new_user.save()
-    expert_profile = Expertuser_relation(user = new_user, name = truename, identity = identity)
-    expert_profile.save()
-    return redirect('/account/expert_profile/')
+    with database_transaction.atomic():
+        new_user = User.objects.create_user(username, email = email, password = password)
+        new_user.user_permissions.add('account.expert_permission')
+        new_user.save()
+        expert_profile = Expertuser_relation(user = new_user, name = truename, identity = identity)
+        expert_profile.save()
+        return redirect('/account/profile/')
                 
-def expert_profile(request):
-    if request.user.is_authenticated:
-        user = request.user
-        try:
-            expert = user.expertuser_relation
-            return render(request, 'account/expert_profile.html',
-                        {'isexpert': True, 'expert': expert})
-        except Expertuser_relation.DoesNotExist:
-            return render(request, 'account/expert_profile.html',
-                        {'isexpert': False, 'expert': None})        
-    else:
-        return HttpResponse("you expert is not login")
-
 def expert_claim_homepage(request, homepagepk):
     pass

@@ -1,0 +1,22 @@
+<table>
+        <tr>
+            <td>user name: </td>
+            <td>{{ transaction.trans_user.user.username }}</td>
+        </tr>
+        <tr>
+            <td>composition: </td>
+            <td>{{transaction.trans_composition.comp_name}}</td>
+        </tr>
+        <tr>
+            <td>id :</td>
+            <td>{{transaction.trans_id}}</td>
+        </tr>
+        <tr>
+            <td>is_accpet</td>
+            <td>{{transaction.is_accept}}</td>
+        </tr>
+        <form method="POST" action="{% url 'buy:accept_trans' transaction.trans_id%}">
+            {% csrf_token %}
+            <input type="submit" value="accept">
+        </form>
+    </table>
