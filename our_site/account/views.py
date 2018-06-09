@@ -70,7 +70,7 @@ def user_logout(request):
     logout(request)
     return redirect('/account')
 
-def uesr_change_password(request):
+def user_change_password(request):
     if request.method == 'GET':
         return render(request, 'account/change_password.html', { 'old_password_err' : False, 'new_password_err' : False})
     elif request.method == 'POST':

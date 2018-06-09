@@ -9,7 +9,7 @@ urlpatterns = [
     path('register/', views.commuser_register, name = 'register'),
     path('profile/', views.commuser_profile, name = 'profile'),
     path('logout/', views.user_logout, name = 'logout'),
-    path('changepasswd/', views.uesr_change_password, name = 'change_password'),
+    path('changepasswd/', views.user_change_password, name = 'change_password'),
 
     path('expert_register/', views.expert_register, name = 'expert_register'),
     path('expert_claim_homepage/<int:homepagepk>/', 
