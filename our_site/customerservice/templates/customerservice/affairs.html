@@ -1,0 +1,22 @@
+<h1>Here to deal with your affairs!!!!</h1>
+<table>
+{% for todo in todos %}
+    <tr>
+        {{ todo.expert.name }} wants home page of {{ todo.homepage.name }}
+    </tr>
+    <tr>
+        <td>
+            <a href="{% url 'homepageclaiming_accept' todo.pk %}">accept</a>
+        </td>
+    </tr>
+    <tr>
+        <form method="POST" action="{% url 'homepageclaiming_reject' todo.pk %}">
+            {% csrf_token %}
+            <td><input type='text' name='reason'/></td>
+            <td><input type='submit' value='reject'/></td>
+        </form>        
+    </tr>
+{% empty %}
+    <tr><td>Nothing to do now. Have a rest!</td></tr>
+{% endfor %}
+</table>

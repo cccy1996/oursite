@@ -22,3 +22,8 @@ class User_Permission(models.Model):
             ('verified_commuser_permission', 'permission desgin for verified common user'),
             ('verified_expert_permission', 'permission design for verified comm user'),
         )
+
+class RealNameInfo(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    name = models.CharField(max_length=40)
+    identity = models.CharField(max_length=18)

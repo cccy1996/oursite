@@ -1,7 +1,13 @@
 
-{% if isexpert %}
+{% if expert is not None %}
     <p>expert real name: {{ expert.name }}</p>
     <p>expert id: {{ expert.identity }}</p>
 {% else %}
     <h2>You are not a expert!!!!</h2>
+{% endif %}
+
+{% if not have_homepage %}
+    <p>You aren't bound to a homepage yet</p>
+{% else %}
+    <a href="://www.baidu.com">Go to your homepage now!</a>
 {% endif %}

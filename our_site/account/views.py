@@ -8,6 +8,9 @@ from django.db import transaction as database_transaction
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
 
+from django.utils import timezone
+from display.models import ExpertDetail
+from customerservice.models import ApplicationForHomepageClaiming
 
 def account_index(request):
     return render(request, 'account/index.html')
@@ -73,7 +76,7 @@ def user_logout(request):
     logout(request)
     return redirect('/account')
 
-def uesr_change_password(request):
+def user_change_password(request):
     if request.method == 'GET':
         return render(request, 'account/change_password.html', { 'old_password_err' : False, 'new_password_err' : False})
     elif request.method == 'POST':
@@ -124,4 +127,37 @@ def expert_register(request):
         return redirect('/account/profile/')
                 
 def expert_claim_homepage(request, homepagepk):
-    pass
+    user = request.user
+    expert = user.expertuser_relation
+    try:
+        detail = expert.expertdetail
+        return HttpResponse("you've already had a homepage")
+    except ExpertDetail.DoesNotExist:
+        # this is the correct branch
+        try:
+            wanted = ExpertDetail.objects.get(pk=homepagepk)
+        except ExpertDetail.DoesNotExist:
+            return HttpResponse("this user doesn't have a home page")
+        if wanted.name != expert.name:
+            return HttpResponse("连名字都不一样")
+        apply = ApplicationForHomepageClaiming()
+        apply.expert = expert
+        apply.homepage = wanted
+        apply.date = timezone.now()
+        apply.state = 'S' # suspending
+        apply.save()
+
+        return redirect('/account/expert_profile/')
+
+def certificate_realname(request):
+    user = request.user
+    if user.has_perm('verified_expert') or user.has_perm('verified_commuser'):
+        return HttpResponse("你已经认证过了")
+    if request.method == 'GET':
+        # 给他一个上传名字和照片的页面
+        pass
+    else:
+        assert request.method == 'POST'
+        # 生成申请发给客服小妹
+
+    
