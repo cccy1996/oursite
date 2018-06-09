@@ -72,10 +72,10 @@ def homepageclaiming_accept(request, appid):
     with database_transaction.atomic():
         app = ApplicationForHomepageClaiming.objects.get(pk=appid)
         expert = app.expert
+        expert.save()
         homepage = app.homepage
         homepage.account = expert
-        homepage.save()
-        expert.save()
+        homepage.save()        
         app.state = 'P'
         app.save()
     return redirect("/customerservice/affairs/")
@@ -102,12 +102,12 @@ def realnamecertification_accept(request, appid):
             user.user_permissions.add('verified_commuser_permission')
         else:
             return HttpResponse("fuck who you are?????????")
+        user.save()
         realname_info = RealNameInfo()
         realname_info.user = user
         realname_info.name = app.name
         realname_info.identity = app.identity
         realname_info.save()
-        user.save()
         app.state = 'P'
         app.save()
     return redirect("/customerservice/affairs/")
