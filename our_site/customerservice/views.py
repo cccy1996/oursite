@@ -1,11 +1,19 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import Permission
 from .models import *
 from django.http import HttpResponse
 from django.db import DatabaseError
 from django.db import transaction as database_transaction
-from account.models import Permission, RealNameInfo, Expertuser_relation
+from account.models import User_Permission, RealNameInfo, Expertuser_relation
+
+def add_permission(user, permstr):
+    content_type = ContentType.objects.get_for_model(User_Permission)
+    permission = Permission.objects.get(content_type = content_type, codename = permstr)
+    user.save()
+    user.user_permissions.add(permission)       
 
 def cs_login(request):
     if request.user.is_authenticated:
@@ -48,8 +56,7 @@ def cs_register(request):
             except DatabaseError as e:
                 return render(request, 'customerservice/register.html', 
                                 {'password_err': False, 'dupusername': True})
-            user.user_permissions.add('service_permission')
-            user.save()
+            add_permission(user, 'service_permission')
             servant = CustomerService()
             servant.user = user
             servant.save()
@@ -62,11 +69,15 @@ def cs_register(request):
 def affairs(request):
     if not request.user.is_authenticated:
         return redirect("/customerservice/login/")
+    if not request.user.has_perm('account.service_permission'):
+        return Http("You don't have admin permission!!!")
 
-    todos = ApplicationForHomepageClaiming.objects.filter(state='S')
-    return render(request, 'customerservice/affairs.html', {'todos': todos})
+    hptodos = ApplicationForHomepageClaiming.objects.filter(state='S')
+    rntodos = ApplicationForRealNameCertification.objects.filter(state='S')
+    return render(request, 'customerservice/affairs.html', 
+                        {'hptodos': hptodos, 'rntodos': rntodos})
 
-#TODO: 怎样通知相关用户其申请通过了吗？
+#TODO: 怎样通知相关用户其申请是否通过？
 
 def homepageclaiming_accept(request, appid):
     with database_transaction.atomic():
@@ -96,10 +107,10 @@ def realnamecertification_accept(request, appid):
     with database_transaction.atomic():
         app = ApplicationForRealNameCertification.objects.get(pk=appid)
         user = app.user
-        if user.has_perm('expert_permission'):
-            user.user_permissions.add('verified_expert_permission')
-        elif user.has_perm('commuser_permission'):
-            user.user_permissions.add('verified_commuser_permission')
+        if user.has_perm('account.expert_permission'):            
+            add_permission(user, 'verified_expert_permission')
+        elif user.has_perm('account.commuser_permission'):            
+            add_permission(user, 'verified_commuser_permission')
         else:
             return HttpResponse("fuck who you are?????????")
         user.save()

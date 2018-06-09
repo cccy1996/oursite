@@ -1,6 +1,7 @@
 <h1>Here to deal with your affairs!!!!</h1>
+<h2>Applications for homepage claiming:</h2>
 <table>
-{% for todo in todos %}
+{% for todo in hptodos %}
     <tr>
         {{ todo.expert.name }} wants home page of {{ todo.homepage.name }}
     </tr>
@@ -17,6 +18,36 @@
         </form>        
     </tr>
 {% empty %}
-    <tr><td>Nothing to do now. Have a rest!</td></tr>
+    <tr><td>No application for homepage claiming</td></tr>
+{% endfor %}
+</table>
+
+<h2>Applications for real name certification:</h2>
+<table>
+{% for todo in rntodos %}
+    <tr>
+        <td>Name: {{ todo.name }}</td>
+        <td>Identity: {{ todo.identity }}</td>
+    </tr>
+    <tr>
+        <td>Picture: </td>
+        <td></td>
+        <img src="{{ todo.pic.url }}" />   
+    </tr>
+    <tr>
+        <td>
+            <a href="{% url 'realnamecertification_accept' todo.pk %}">accept</a>
+        </td>
+    </tr>
+    <tr>
+        <form method="POST" action="{% url 'realnamecertification_reject' todo.pk %}">
+            {% csrf_token %}
+            <td><input type='text' name='reason'/></td>
+            <td><input type='submit' value='reject'/></td>
+        </form>
+    </tr>
+    <br/>
+{% empty %}
+    <tr><td>No application for real name certification:</td></tr>
 {% endfor %}
 </table>

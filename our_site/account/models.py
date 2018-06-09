@@ -16,11 +16,11 @@ class Commuser_relation(models.Model):
 class User_Permission(models.Model):
     class Meta:
         permissions = (
-            ('commuser_permission', 'permission design for common user'),
-            ('expert_permission', 'permission design for expert'),
-            ('service_permission', 'permission design for custom service'),
-            ('verified_commuser_permission', 'permission desgin for verified common user'),
-            ('verified_expert_permission', 'permission design for verified comm user'),
+            ('commuser_permission', 'permission designed for common user'),
+            ('expert_permission', 'permission designed for expert'),
+            ('service_permission', 'permission designed for custom service'),
+            ('verified_commuser_permission', 'permission desgined for verified common user'),
+            ('verified_expert_permission', 'permission designed for verified common user'),
         )
 
 class RealNameInfo(models.Model):

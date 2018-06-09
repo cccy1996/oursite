@@ -14,4 +14,6 @@ urlpatterns = [
     path('expert_register/', views.expert_register, name = 'expert_register'),
     path('expert_claim_homepage/<int:homepagepk>/', 
             views.expert_claim_homepage, name = 'expert_claim_homepage'),
+    path('certificate_realname/', 
+            views.certificate_realname, name = 'certificate_realname'),
 ]
