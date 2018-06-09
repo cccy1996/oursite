@@ -143,4 +143,15 @@ def expert_claim_homepage(request, homepagepk):
 
         return redirect('/account/expert_profile/')
 
+def certificate_realname(request):
+    user = request.user
+    if user.has_perm('verified_expert') or user.has_perm('verified_commuser'):
+        return HttpResponse("你已经认证过了")
+    if request.method == 'GET':
+        # 给他一个上传名字和照片的页面
+        pass
+    else:
+        assert request.method == 'POST"
+        # 生成申请发给客服小妹
+
     

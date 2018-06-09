@@ -11,4 +11,8 @@ urlpatterns = [
          name='homepageclaiming_accept'),
     path('homepageclaiming/<int:appid>/reject/', views.homepageclaiming_reject,
          name='homepageclaiming_reject'),
+    path('realnamecertification/<int:appid>/accept/', views.realnamecertification_accept,
+         name='realnamecertification_accept'),
+    path('realnamecertification/<int:appid>/reject/', views.realnamecertification_reject,
+         name='realnamecertification_reject'),
 ]
