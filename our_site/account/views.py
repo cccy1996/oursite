@@ -5,6 +5,9 @@ from .models import *
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db import transaction as database_transaction
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import Permission
+
 
 def account_index(request):
     return render(request, 'account/index.html')
@@ -26,8 +29,11 @@ def commuser_register(request):
             
             with database_transaction.atomic():
                 new_user = User.objects.create_user(username, email = email, password = password)
-                new_user.user_permissions.add('account.commuser_permission')
+                
+                content_type = ContentType.objects.get_for_model(User_Permission)
+                permission = Permission.objects.get(content_type = content_type,codename = 'commuser_permission')
                 new_user.save()
+                new_user.user_permissions.add(permission)
                 relation = Commuser_relation(user = new_user, credit = 0)
                 relation.save()
                 login(request, new_user)

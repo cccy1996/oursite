@@ -13,7 +13,7 @@ class Commuser_relation(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE, primary_key = True)
     credit = models.DecimalField(max_digits=9,decimal_places=1)
 
-class Permission(models.Model):
+class User_Permission(models.Model):
     class Meta:
         permissions = (
             ('commuser_permission', 'permission design for common user'),
