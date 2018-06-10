@@ -19,7 +19,7 @@ class Project(Composition):
 class Paper(Composition):
     composition = models.OneToOneField(Composition, on_delete = models.CASCADE, primary_key = True)
     origin = models.CharField(max_length=25)
-    abstractt = models.CharField(max_length=200)
+    abstract = models.CharField(max_length=200)
     keyword = models.CharField(max_length=40)
 
 class Patent(Composition):
@@ -41,3 +41,26 @@ class Appendix(models.Model):
     upload_time = models.DateTimeField('uploaded time')
     upload_path = models.FileField(upload_to=composition_directory_path)
     upload_size = models.DecimalField(max_digits=8,decimal_places=2)
+
+class ExpertDetail(models.Model):
+    # a primary key defined in order to avoid repeating
+    custompk = models.PositiveIntegerField(primary_key=True) 
+    name = models.CharField(max_length=40)
+    account = models.OneToOneField(Expertuser_relation, on_delete=models.SET_NULL, null=True)
+    intro = models.CharField(max_length=512) #personal introduction
+
+class Institute(models.Model):
+    inst_name = models.CharField(max_length=30)
+    inst_en_name = models.CharField(max_length=45)
+    inst_type = models.CharField(max_length=20)
+    members = models.ManyToManyField(ExpertDetail, through='Membership')
+
+class Membership(models.Model):
+    expert = models.ForeignKey(ExpertDetail, on_delete=models.CASCADE)
+    institute = models.ForeignKey(Institute, on_delete=models.CASCADE)
+    post = models.CharField(max_length=50) #职务
+
+
+    
+
+    

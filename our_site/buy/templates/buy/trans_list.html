@@ -1,0 +1,26 @@
+<table>
+    <tr>
+        <td>composition</td>
+        <td>id</td>
+        <td>price</td>
+        <td>application date</td>
+        <td>deal date</td>
+        <td>accept</td>
+        <td>pay</td>
+    </tr>
+    {% for trans in transaction_list %}
+    <tr>
+        <td>
+            <a href = '{% url 'buy:bought_item' trans.trans_id%}'>
+                {{trans.trans_composition.comp_name}}
+            </a>
+        </td>
+        <td>{{trans.trans_id}}</td>
+        <td>{{trans.trans_price}}</td>
+        <td>{{trans.app_date}}</td>
+        <td>{{trans.trans_date}}</td>
+        <td>{{trans.is_accept}}</td>
+        <td>{{trans.is_paid}}</td>
+    </tr>
+    {% endfor %}
+</table>

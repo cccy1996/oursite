@@ -1,0 +1,6 @@
+<h1>Here to do a real name certification!</h1>
+<form method="POST" action="{% url 'account:certificate_realname' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit"/>
+</form>

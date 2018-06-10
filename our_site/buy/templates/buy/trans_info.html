@@ -1,0 +1,22 @@
+<table>
+    <tr>
+        <td>composition name: </td>
+        <td>{{composition.comp_name}}</td>
+    </tr>
+    <tr>
+        <td>composition upload time: </td>
+        <td>{{composition.upload_time}}</td>
+    </tr>
+    <tr>
+        <td>expert name: </td>
+        <td>{{composition.expert.name}}</td>
+    </tr>
+    <tr>
+        <td>price :</td>
+        <td>{{composition.price}}</td>
+    </tr>
+    <form method="POST" action="{% url 'buy:applicate_transact' composition.comp_id%}">
+    {% csrf_token %}
+        <input type="submit" value="submit">
+    </form>
+</table>

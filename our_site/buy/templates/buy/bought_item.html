@@ -1,0 +1,24 @@
+<a href="{% url 'buy:trans_list' %}"> back </a>
+<br>
+<table>
+    <tr>
+        <td>composition: </td>
+        <td>{{transaction.trans_composition.comp_name}}</td>
+    </tr>
+    <tr>
+        <td>id :</td>
+        <td>{{transaction.trans_id}}</td>
+    </tr>
+    <tr>
+        <td>is_accpet</td>
+        <td>{{transaction.is_accept}}</td>
+    </tr>
+    <tr>
+        <td>is_paid</td>
+        <td>{{transaction.is_paid}}</td>
+    </tr>
+    <form method="POST" action="{% url 'buy:bought_item' transaction.trans_id%}">
+        {% csrf_token %}
+        <input type="submit" value="pay">
+    </form>
+</table>

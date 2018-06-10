@@ -1,0 +1,47 @@
+<form method="POST" action="{% url 'account:expert_register' %}">
+    {% csrf_token %}
+    <table>
+        <tr>
+            <td>username:</td>
+            <td>
+                <input type="text" name="username">
+            </td>
+        </tr>
+        <tr>
+            <td>password:</td>
+            <td>
+                <input type="password" name="password">
+            </td>
+        </tr>
+        <tr>
+            <td>comfirm password:</td>
+            <td>
+                <input type="password" name="password_confirm">
+            </td>
+        </tr>
+        <tr>
+            <td>email:</td>
+            <td>
+                <input type="email" name="email">
+            </td>
+        </tr>
+        <tr>
+            <td>your real name:</td>
+            <td><input type='text' name='truename' /></td>
+        </tr>
+        <tr>
+            <td>your id card number:</td>
+            <td><input type='text' name='identity' /></td>
+        </tr>
+        <tr>
+            <td>
+                <input type="submit" value="submit">
+            </td>
+        </tr>
+    </table>
+</form>
+{% if username_err is True%} please change a username {%endif%}
+{% if password_err is True%} please confirm your password {%endif%}
+{% if identity_err is True %}
+    <h2>an expert with the same id card number has already registered</h2> 
+{% endif %}
