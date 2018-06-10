@@ -4,8 +4,10 @@ from django.contrib.auth.models import User
 from .models import *
 from django.http import HttpResponse
 
+
 def account_index(request):
     return render(request, 'account/index.html')
+
 
 def commuser_register(request):
     if request.method == 'GET':
@@ -15,37 +17,37 @@ def commuser_register(request):
         password = request.POST['password']
         password_comfirm = request.POST['password_comfirm']
         email = request.POST['email']
-        
         try:
-            search_user = User.objects.get(username = username)
+            search_user = User.objects.get(username=username)
         except Exception:
             if password != password_comfirm:
                 return render(request, 'account/commuser_register.html', {'password_err': True, 'username_err': False})
-            new_user = User.objects.create_user(username, email = email, password = password)
+            new_user = User.objects.create_user(username, email=email, password=password)
             new_user.save()
-            relation = Commuser_relation(user = new_user, credit = 0)
+            relation = Commuser_relation(user=new_user, credit=0)
             relation.save()
             login(request, new_user)
             return redirect('/account/profile/')
-        return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err' : True})
+        return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err': True})
         #need a username duplicate check
 
 
 def commuser_login(request):
-    if request.method  == 'GET':
+    if request.method == 'GET':  #刚进去此页面，一般跳转页面是GET
         if request.user.is_authenticated:
             return redirect('/account/profile/')
         else:
             return render(request, 'account/commuser_login.html', {'relog' : False})
-    elif request.method == 'POST':
+    elif request.method == 'POST': #点提交之后页面的响应
         username = request.POST['username']
         password = request.POST['password']
-        user = authenticate(request, username = username, password = password)
+        user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
             return redirect('/account/profile/')
         else:
-            return render(request, 'account/commuser_login.html', {'relog' : True})
+            return render(request, 'account/commuser_login.html', {'relog': True})
+
 
 def expert_login(request):
     if request.method  == 'GET':
@@ -56,12 +58,13 @@ def expert_login(request):
     elif request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
-        user = authenticate(request, username = username, password = password)
+        user = authenticate(request, username = username, password=password)
         if user is not None:
             login(request, user)
             return redirect('/account/expert_profile/')
         else:
-            return render(request, 'account/expert_login.html', {'relog' : True})
+            return render(request, 'account/expert_login.html', {'relog': True})
+
 
 def commuser_profile(request):
     if request.user.is_authenticated:
@@ -74,6 +77,7 @@ def commuser_profile(request):
 def user_logout(request):
     logout(request)
     return redirect('/account')
+
 
 def uesr_change_password(request):
     if request.method == 'GET':
