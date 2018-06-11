@@ -10,7 +10,9 @@ from django.contrib.auth.models import Permission
 
 from django.utils import timezone
 from display.models import ExpertDetail
-from customerservice.models import ApplicationForHomepageClaiming
+from customerservice.models import ApplicationForHomepageClaiming, ApplicationForRealNameCertification
+
+from .forms import RealNameForm
 
 def account_index(request):
     return render(request, 'account/index.html')
@@ -47,8 +49,12 @@ def commuser_register(request):
 def commuser_login(request):
     if request.method  == 'GET':
         if request.user.is_authenticated:
+<<<<<<< HEAD
             #logout(request)
             return redirect('/account/profile')
+=======
+            logout(request)
+>>>>>>> ffb7e6a46ed055ae27b1182d5d8926b7ca9cc3fd
         return render(request, 'account/commuser_login.html', {'relog' : False})
     elif request.method == 'POST':
         username = request.POST['username']
@@ -64,7 +70,14 @@ def commuser_login(request):
 def commuser_profile(request):
     if request.user.has_perm('account.commuser_permission'):
         commuser = request.user.commuser_relation
-        return render(request, 'account/commuser_profile.html', {'commuser' : commuser})
+        try:
+            realnameinfo = request.user.realnameinfo
+            return render(request, 'account/commuser_profile.html', 
+                    {'commuser' : commuser, 'realnameinfo': realnameinfo})
+        except RealNameInfo.DoesNotExist:
+            return render(request, 'account/commuser_profile.html', 
+                    {'commuser' : commuser, 'realnameinfo': None})
+        
     elif request.user.has_perm('account.expert_permission'):
         expert = request.user.expertuser_relation
         return render(request, 'account/expert_profile.html',
@@ -77,6 +90,7 @@ def user_logout(request):
     logout(request)
     return redirect('/account')
 
+@login_required(login_url = '/account/login/')
 def user_change_password(request):
     if request.method == 'GET':
         return render(request, 'account/change_password.html', { 'old_password_err' : False, 'new_password_err' : False})
@@ -129,6 +143,7 @@ def expert_register(request):
         expert_profile.save()
         return redirect('/account/profile/')
                 
+@login_required(login_url = '/account/login/')
 def expert_claim_homepage(request, homepagepk):
     user = request.user
     expert = user.expertuser_relation
@@ -143,24 +158,36 @@ def expert_claim_homepage(request, homepagepk):
             return HttpResponse("this user doesn't have a home page")
         if wanted.name != expert.name:
             return HttpResponse("连名字都不一样")
-        apply = ApplicationForHomepageClaiming()
-        apply.expert = expert
-        apply.homepage = wanted
-        apply.date = timezone.now()
-        apply.state = 'S' # suspending
+        apply = ApplicationForHomepageClaiming.objects.create(
+            expert=expert, homepage=wanted, date=timezone.now(), state='S',
+        )
         apply.save()
 
         return redirect('/account/expert_profile/')
 
+@login_required(login_url = '/account/login/')
 def certificate_realname(request):
     user = request.user
-    if user.has_perm('verified_expert') or user.has_perm('verified_commuser'):
+    if user.has_perm('account.verified_expert_permission') or user.has_perm(
+        'account.verified_commuser_permission'):
         return HttpResponse("你已经认证过了")
     if request.method == 'GET':
-        # 给他一个上传名字和照片的页面
-        pass
+        form = RealNameForm()
+        return render(request, 
+                "account/certificate_realname.html", {'form': form, 'invalid': False})    
     else:
         assert request.method == 'POST'
-        # 生成申请发给客服小妹
+        form = RealNameForm(request.POST, request.FILES)
+        if form.is_valid():
+            application = ApplicationForRealNameCertification.objects.create(
+                user=user, name=request.POST['realname'], identity=request.POST['identity'],
+                pic=request.FILES['pic'], state='S',
+            )
+            application.save()
+            return HttpResponse("application commited successfully! please wait for shenhe")
+        else:
+            form = RealNameForm()
+            return render(request, "account/certificate_realname.html",
+                            {'form': form, 'invalid': True})
 
     

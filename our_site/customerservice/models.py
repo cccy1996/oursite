@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from account.models import Expertuser_relation
 from display.models import ExpertDetail
-
+from django.utils import timezone
 class CustomerService(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     
@@ -17,6 +17,7 @@ class ApplicationForHomepageClaiming(models.Model):
     )
     state = models.CharField(max_length=1, choices=STATE_CHOICES)
     reject_reason = models.CharField(max_length=32)
+    
 
 class ApplicationForRealNameCertification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

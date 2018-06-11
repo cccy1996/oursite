@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'display',
     'search',
     'question',
-    'message',
+    'message.apps.MessageConfig',
     "customerservice",
 ]
 
@@ -86,9 +86,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'oursite',
         'USER': 'root',
-        'PASSWORD': 'cenyi123',
+        'PASSWORD': '90706991',
         'HOST': '127.0.0.1',
-        'PORT':'3306',
+        'PORT': '3306',
     }
 }
 
@@ -129,5 +129,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
-STATIC_URL = '/static/'
-MEDIA_ROOT = '/media/'
+STATIC_URL = BASE_DIR + '/static/'
+MEDIA_ROOT = BASE_DIR + '/media/'
+MEDIA_URL = BASE_DIR + '/media/'

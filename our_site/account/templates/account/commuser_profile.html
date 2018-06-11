@@ -1,3 +1,8 @@
 {{user.username}}<br>
 {{commuser.credit}}<br>
+<a href="{% url 'message:index' %}">message</a><br>
 <a href="{% url 'account:logout' %}">log out</a>
+{% if realnameinfo is not None %}
+    <p>You're real-name certificated</p>
+    <p>with name {{realnameinfo.name}} and id {{realnameinfo.identity}}</p>
+{% endif %}
