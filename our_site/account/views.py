@@ -47,8 +47,9 @@ def commuser_register(request):
 def commuser_login(request):
     if request.method  == 'GET':
         if request.user.is_authenticated:
-            logout(request)
-            return render(request, 'account/commuser_login.html', {'relog' : False})
+            #logout(request)
+            return redirect('/account/profile')
+        return render(request, 'account/commuser_login.html', {'relog' : False})
     elif request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -120,8 +121,10 @@ def expert_register(request):
                         {'password_err': False, 'username_err': False, 'identity_err': True})
     with database_transaction.atomic():
         new_user = User.objects.create_user(username, email = email, password = password)
-        new_user.user_permissions.add('account.expert_permission')
         new_user.save()
+        content_type = ContentType.objects.get_for_model(User_Permission)
+        permission = Permission.objects.get(content_type = content_type,codename = 'expert_permission')
+        new_user.user_permissions.add(permission)
         expert_profile = Expertuser_relation(user = new_user, name = truename, identity = identity)
         expert_profile.save()
         return redirect('/account/profile/')

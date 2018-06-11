@@ -9,7 +9,7 @@ from django.db import transaction as database_transaction
 
 
 @login_required(login_url = '/account/login/')
-@permission_required('account.permission', login_url = '/account/login/')
+@permission_required('account.verified_commuser_permission', login_url = '/account/login/')
 def trans_info (request, pk):
     try:
         require_composition = Composition.objects.get(pk = pk)
@@ -19,7 +19,7 @@ def trans_info (request, pk):
     return render(request, 'buy/trans_info.html', {'composition' : require_composition})
 
 @login_required(login_url = '/account/login/')
-@permission_required('account.permission', login_url = '/account/login/')
+@permission_required('account.verified_commuser_permission', login_url = '/account/login/')
 def applicate_transact(request, pk):
     if request.method == 'POST':
         try:
@@ -42,7 +42,7 @@ def applicate_transact(request, pk):
         return HttpResponse("what are you fucking doing!")
 
 @login_required(login_url = '/account/login/')
-@permission_required('account.permission', login_url = '/account/login/')
+@permission_required('account.verified_commuser_permission', login_url = '/account/login/')
 def trans_list(request):
     user = request.user.commuser_relation
     transaction_list = Transaction.objects.filter(trans_user = user)
@@ -51,7 +51,7 @@ def trans_list(request):
     return render(request, 'buy/trans_list.html', {'transaction_list': transaction_list})
 
 @login_required(login_url = '/account/login/')
-@permission_required('account.permission', login_url = '/account/login/')
+@permission_required('account.verified_commuser_permission  ', login_url = '/account/login/')
 def bought_item(request, pk):
     user = request.user.commuser_relation
     try:
@@ -76,7 +76,7 @@ def bought_item(request, pk):
 #expert module next:
 
 @login_required(login_url = '/account/login/')
-@permission_required('account.permission', login_url = '/account/login/')
+@permission_required('account.verified_expert_permission', login_url = '/account/login/', raise_exception=True)
 def expert_trans_list(request):
     user = request.user.expertuser_relation
     transaction_list = Transaction.objects.filter(trans_composition__expert = user)
@@ -84,7 +84,7 @@ def expert_trans_list(request):
     return render(request, 'buy/expert_trans_list.html', {'transaction_list' : transaction_list})
 
 @login_required(login_url = '/account/login/')
-@permission_required('account.permission', login_url = '/account/login/')
+@permission_required('account.verified_expert_permission', login_url = '/account/login/')
 def accept_trans(request, pk):
     try:
         trans = Transaction.objects.get(pk = pk)

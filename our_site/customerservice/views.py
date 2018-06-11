@@ -5,7 +5,7 @@ from .models import *
 from django.http import HttpResponse
 from django.db import DatabaseError
 from django.db import transaction as database_transaction
-from account.models import Permission, RealNameInfo, Expertuser_relation
+from account.models import User_Permission, RealNameInfo, Expertuser_relation
 
 def cs_login(request):
     if request.user.is_authenticated:
