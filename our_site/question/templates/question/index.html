@@ -1,0 +1,22 @@
+<table>
+    <tr>
+        <td>
+            <a href="{% url 'question:ask_question' %}">向专家提问</a>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="{% url 'question:question_list' 0 %}">未回答问题</a>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="{% url 'question:question_list' 1 %}">已回答问题</a>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="{% url 'account:change_password' %}">change password</a>
+        </td>
+    </tr>
+</table>

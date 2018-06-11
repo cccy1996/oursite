@@ -1,0 +1,28 @@
+<form method="POST" action="{% url 'question:ask_question' %}">
+    {% csrf_token %}
+    <table>
+        <tr>
+            <td>username:</td>
+            <td>
+                {{ username }}
+            </td>
+        </tr>
+        <tr>
+            <td>问题标题</td>
+            <td>
+                <input type="text" name="question_title">
+            </td>
+        </tr>
+        <tr>
+            <td>问题描述</td>
+            <td>
+                <input type="text" name="question_content">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="submit" value="submit">
+            </td>
+        </tr>
+    </table>
+</form>

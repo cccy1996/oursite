@@ -1,0 +1,25 @@
+<table>
+    {% if query_error == True %}
+    <tr>
+        <td>
+            查询失败
+        </td>
+    </tr>
+    {% else %}
+    <tr>
+        <td>
+            问题id：{{question.que_id}}
+        </td>
+    </tr>
+    <tr>
+        <td>
+            问题标题：{{question.que_title}}
+        </td>
+    </tr>
+    <tr>
+        <td>
+            问题日期：{{question.que_date}}
+        </td>
+    </tr>
+    {% endif %}
+</table>
