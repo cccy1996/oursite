@@ -6,10 +6,6 @@ class Institute(models.Model):
     inst_en_name = models.CharField(max_length=45)
     inst_type = models.CharField(max_length=20)
 
-class Membership(models.Model):
-    expert = models.ForeignKey(ExpertDetail, on_delete=models.CASCADE)
-    institute = models.ForeignKey(Institute, on_delete=models.CASCADE)
-    post = models.CharField(max_length=50) #职务 
 
 class StudyArea(models.Model):
     area_name = models.CharField(max_length=30) 
@@ -61,3 +57,8 @@ class ExpertDetail(models.Model):
     institutes = models.ManyToManyField(Institute, through='Membership')
     study_areas = models.ManyToManyField(StudyArea)
 
+
+class Membership(models.Model):
+    expert = models.ForeignKey(ExpertDetail, on_delete=models.CASCADE)
+    institute = models.ForeignKey(Institute, on_delete=models.CASCADE)
+    post = models.CharField(max_length=50) #职务 
