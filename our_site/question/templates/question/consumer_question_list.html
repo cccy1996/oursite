@@ -1,0 +1,11 @@
+<table>
+    {% for question in que_list %}
+    <tr>
+        <td>
+            <a href="{% url 'question:question_detail' question.que_id %}">
+                {{ question.que_title }}
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
