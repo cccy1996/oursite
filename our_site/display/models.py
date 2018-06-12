@@ -45,7 +45,6 @@ class Appendix(models.Model):
         ('V', 'Video'),
     )
     app_type = models.CharField(max_length=1, choices=FILE_TYPES)
-    upload_time = models.DateTimeField('uploaded time')
     uploaded = models.FileField(upload_to=composition_directory_path)
 
 class ExpertDetail(models.Model):
