@@ -1,6 +1,19 @@
 from django.db import models
 from account.models import Expertuser_relation
 
+class Institute(models.Model):
+    inst_name = models.CharField(max_length=30)
+    inst_en_name = models.CharField(max_length=45)
+    inst_type = models.CharField(max_length=20)
+
+class Membership(models.Model):
+    expert = models.ForeignKey(ExpertDetail, on_delete=models.CASCADE)
+    institute = models.ForeignKey(Institute, on_delete=models.CASCADE)
+    post = models.CharField(max_length=50) #职务 
+
+class StudyArea(models.Model):
+    area_name = models.CharField(max_length=30) 
+
 class Composition(models.Model):
     comp_name = models.CharField(max_length=50)
     upload_time = models.DateTimeField('composition uploaded time')
@@ -48,15 +61,3 @@ class ExpertDetail(models.Model):
     institutes = models.ManyToManyField(Institute, through='Membership')
     study_areas = models.ManyToManyField(StudyArea)
 
-class Institute(models.Model):
-    inst_name = models.CharField(max_length=30)
-    inst_en_name = models.CharField(max_length=45)
-    inst_type = models.CharField(max_length=20)
-
-class Membership(models.Model):
-    expert = models.ForeignKey(ExpertDetail, on_delete=models.CASCADE)
-    institute = models.ForeignKey(Institute, on_delete=models.CASCADE)
-    post = models.CharField(max_length=50) #职务 
-
-class StudyArea(models.Model):
-    area_name = models.CharField(max_length=30) 
