@@ -15,7 +15,7 @@ from django.utils import timezone
 from display.models import ExpertDetail
 from customerservice.models import ApplicationForHomepageClaiming, ApplicationForRealNameCertification
 
-from .forms import RealNameForm
+from .forms import *
 
 def account_index(request):
     return render(request, 'account/index.html')
@@ -226,7 +226,54 @@ def invite_register(request, inviter_id):
             return redirect('/account/profile/')
         return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err' : True})
 
+
+def save_appendix(request, composition, type):
+    files = request.FILES.getlist(type)
+    for f in files:
+        appendx = Appendix.objects.create(
+            composition = composition,
+            uploaded = f,
+        )
+        if type == 'text_field':
+            appendx.app_type = 'T'
+        elif type == 'picture_field':
+            appendx.app_type = 'P'
+        else:
+            appendx.app_type = 'V'
+        appendx.save()
+
 @login_required()
-@permission_required('account.verified_expert_permission', raise_exception=True)
-def add_Project(request):
-    pass
+#@permission_required('account.verified_expert_permission', raise_exception=True)
+def add_project(request):
+    if request.method == 'GET':
+        form = ProjectForm()
+        return render(request, 'account/add_project.html', {'form':form, 'invalid':False})
+    else:
+        form = ProjectForm(request.POST, request.FILES)
+        if form.is_valid():
+            with database_transaction.atomic():
+                composition = Composition.objects.create(
+                    comp_name = request.POST['comp_name'],
+                    upload_time = timezone.now(),
+                    expert = request.user.expertuser_relation,
+                    price = request.POST['price'],
+                    description = request.POST['description'],
+                )
+                composition.save()
+                project = Project.objects.create(
+                    composition = composition,
+                    organization = request.POST['organization'],
+                    start_time = request.POST['start_time'],
+                    end_time = request.POST['end_time'],
+                )
+                project.save()
+                
+                save_appendix(request, composition, 'text_field')
+                save_appendix(request, composition, 'picture_field')
+                save_appendix(request, composition, 'video_field')
+                
+            return HttpResponse('add successfully')
+        else:
+            form = ProjectForm()
+            return render(request, 'account/add_project.html', {'form':form, 'invalid':True})
+
