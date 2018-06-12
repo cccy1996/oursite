@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.db import transaction as database_transaction
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
+from django.utils import timezone
+import datetime
 
 from django.utils import timezone
 from display.models import ExpertDetail
@@ -41,26 +43,27 @@ def commuser_register(request):
                 new_user.user_permissions.add(permission)
                 relation = Commuser_relation(user = new_user, credit = 0)
                 relation.save()
-                login(request, new_user)
-                return redirect('/account/profile/')
+            login(request, new_user)
+            return redirect('/account/profile/')
         return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err' : True})
-        #need a username duplicate check
+
 
 def commuser_login(request):
     if request.method  == 'GET':
         if request.user.is_authenticated:
-<<<<<<< HEAD
             #logout(request)
             return redirect('/account/profile')
-=======
-            logout(request)
->>>>>>> ffb7e6a46ed055ae27b1182d5d8926b7ca9cc3fd
         return render(request, 'account/commuser_login.html', {'relog' : False})
     elif request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(request, username = username, password = password)
         if user is not None:
+            #登陆时直接比较登陆时间来增加积分
+            if user.has_perm('account.commuser_permission'):
+                if user.last_login + datetime.timedelta(days = 1) < timezone.now():
+                    user.commuser_relation.credit += 10
+                    user.commuser_relation.save()
             login(request, user)
             return redirect('/account/profile/')
         else:
@@ -141,7 +144,7 @@ def expert_register(request):
         new_user.user_permissions.add(permission)
         expert_profile = Expertuser_relation(user = new_user, name = truename, identity = identity)
         expert_profile.save()
-        return redirect('/account/profile/')
+    return redirect('/account/profile/')
                 
 @login_required(login_url = '/account/login/')
 def expert_claim_homepage(request, homepagepk):
@@ -190,4 +193,35 @@ def certificate_realname(request):
             return render(request, "account/certificate_realname.html",
                             {'form': form, 'invalid': True})
 
-    
+def invite_register(request, inviter_id):
+    if request.method == 'GET':
+        inviter = User.objects.filter(id = inviter_id)
+        if inviter.count() == 0 or inviter[0].has_perm('account.commuser_permission') == False:
+            return HttpResponse("邀请人不存在")
+        return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err': False})
+    elif request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        password_comfirm = request.POST['password_comfirm']
+        email = request.POST['email']
+        
+        try:
+            search_user = User.objects.get(username = username)
+        except Exception:
+            if password != password_comfirm:
+                return render(request, 'account/commuser_register.html', {'password_err': True, 'username_err': False})
+            inviter = User.objects.get(id = inviter_id)
+            with database_transaction.atomic():
+                new_user = User.objects.create_user(username, email = email, password = password)
+                content_type = ContentType.objects.get_for_model(User_Permission)
+                permission = Permission.objects.get(content_type = content_type,codename = 'commuser_permission')
+                new_user.save()
+                new_user.user_permissions.add(permission)
+                relation = Commuser_relation(user = new_user, credit = 0)
+                relation.save()
+                inviter.commuser_relation.credit += 10
+                inviter.commuser_relation.save()
+            login(request, new_user)
+            return redirect('/account/profile/')
+        return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err' : True})
+
