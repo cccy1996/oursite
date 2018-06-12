@@ -8,7 +8,7 @@ class Composition(models.Model):
     expert = models.ForeignKey(Expertuser_relation, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=9,decimal_places=1, default = 0)
 
-class Project(Composition):
+class Project(models.Model):
     composition = models.OneToOneField(Composition, on_delete = models.CASCADE, primary_key = True)
     proj_type = models.CharField(max_length=25)
     organization = models.CharField(max_length=25)
@@ -16,13 +16,13 @@ class Project(Composition):
     start_time = models.DateTimeField('project started time')
     end_time = models.DateTimeField('project ended time')
 
-class Paper(Composition):
+class Paper(models.Model):
     composition = models.OneToOneField(Composition, on_delete = models.CASCADE, primary_key = True)
     origin = models.CharField(max_length=25)
     abstract = models.CharField(max_length=200)
     keyword = models.CharField(max_length=40)
 
-class Patent(Composition):
+class Patent(models.Model):
     composition = models.OneToOneField(Composition, on_delete = models.CASCADE, primary_key = True)
     patent_type = models.CharField(max_length=25)
     patent_no = models.CharField(max_length=25)
@@ -60,7 +60,5 @@ class Membership(models.Model):
     institute = models.ForeignKey(Institute, on_delete=models.CASCADE)
     post = models.CharField(max_length=50) #职务
 
-
-    
-
-    
+class Study_area(models.Model):
+    area_name = models.CharField(max_length=30)

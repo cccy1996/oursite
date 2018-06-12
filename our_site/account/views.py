@@ -9,6 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
 from django.utils import timezone
 import datetime
+from display.models import *
 
 from django.utils import timezone
 from display.models import ExpertDetail
@@ -225,3 +226,7 @@ def invite_register(request, inviter_id):
             return redirect('/account/profile/')
         return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err' : True})
 
+@login_required()
+@permission_required('account.verified_expert_permission', raise_exception=True)
+def add_Project(request):
+    pass
