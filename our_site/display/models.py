@@ -34,18 +34,30 @@ class Patent(models.Model):
     apply_time = models.DateTimeField('patent applied time')
     auth_time = models.DateTimeField('patent authorized time')
 
-def composition_directory_path(instance, filename):
-    return 'composition_appendix/composition_{0}/{1}'.format(instance.composition.pk, filename)
+def composition_appendix_path(instance, filename):
+    return 'compositions/composition_{0}/appendix/{1}'.format(instance.composition.pk, filename)
+def composition_display_material_path(instance, filename):
+    return 'compositions/composition_{0}/display/{1}'.format(instance.composition.pk, filename)
+
+
+# 关于 Appendix 和 DisplayMaterial的区别：
+# Appendix 是附件，成果的说明书、论文pdf之类的东西，应该只有购买者有权下载，未购买者应该只卡看到一个列表
+# DisplayMaterial 是用来展示成果效果的图片或者视频，应该所有人都能看到
 
 class Appendix(models.Model):
+    # 附件没必要保存文件类型，只要客户能下载就可以了
     composition = models.ForeignKey(Composition, on_delete = models.CASCADE)
+    uploaded = models.FileField(upload_to=composition_appendix_path)
+
+class DisplayMaterial(models.Model):
+    composition = models.ForeignKey(Composition, on_delete=models.CASCADE)
     FILE_TYPES = (
-        ('T', 'Text'), # 文档一类
         ('P', 'Picture'),
         ('V', 'Video'),
     )
-    app_type = models.CharField(max_length=1, choices=FILE_TYPES)
-    uploaded = models.FileField(upload_to=composition_directory_path)
+    material_type = models.CharField(max_length=1, choices=FILE_TYPES)
+    uploaded = models.FileField(upload_to=)
+    description = models.CharField(max_length=32, default="")
 
 class ExpertDetail(models.Model):
     # a primary key defined in order to avoid repeating
