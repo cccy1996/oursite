@@ -277,3 +277,127 @@ def add_project(request):
             form = ProjectForm()
             return render(request, 'account/add_project.html', {'form':form, 'invalid':True})
 
+@login_required()
+#@permission_required('account.verified_expert_permission', raise_exception=True)
+def add_project(request):
+    if request.method == 'GET':
+        form = ProjectForm()
+        return render(request, 'account/add_project.html', {'form':form, 'invalid':False})
+    else:
+        form = ProjectForm(request.POST, request.FILES)
+        if form.is_valid():
+            with database_transaction.atomic():
+                composition = Composition.objects.create(
+                    comp_name = request.POST['comp_name'],
+                    upload_time = timezone.now(),
+                    expert = request.user.expertuser_relation,
+                    price = request.POST['price'],
+                    description = request.POST['description'],
+                )
+                composition.save()
+                project = Project.objects.create(
+                    composition = composition,
+                    organization = request.POST['organization'],
+                    start_time = request.POST['start_time'],
+                    end_time = request.POST['end_time'],
+                )
+                project.save()
+                
+                save_appendix(request, composition, 'text_field')
+                save_appendix(request, composition, 'picture_field')
+                save_appendix(request, composition, 'video_field')
+                
+            return HttpResponse('add successfully')
+        else:
+            form = ProjectForm()
+            return render(request, 'account/add_project.html', {'form':form, 'invalid':True})
+
+
+@login_required()
+#@permission_required('account.verified_expert_permission', raise_exception=True)
+def add_paper(request):
+    if request.method == 'GET':
+        form = PaperForm()
+        return render(request, 'account/add_paper.html', {'form':form, 'invalid':False})
+    else:
+        form = PaperForm(request.POST, request.FILES)
+        if form.is_valid():
+            with database_transaction.atomic():
+                composition = Composition.objects.create(
+                    comp_name = request.POST['comp_name'],
+                    upload_time = timezone.now(),
+                    expert = request.user.expertuser_relation,
+                    price = request.POST['price'],
+                    description = request.POST['description'],
+                )
+                composition.save()
+                paper = Paper.objects.create(
+                    composition = composition,
+                    abstract = request.POST['abstract'],
+                    keywords = request.POST['keywords'],
+                )
+                paper.save()
+                save_appendix(request, composition, 'text_field')
+                save_appendix(request, composition, 'picture_field')
+                save_appendix(request, composition, 'video_field')
+                
+            return HttpResponse('add successfully')
+        else:
+            form = PaperForm()
+            return render(request, 'account/add_paper.html', {'form':form, 'invalid':True})
+
+@login_required()
+#@permission_required('account.verified_expert_permission', raise_exception=True)
+def add_patent(request):
+    if request.method == 'GET':
+        form = PatentForm()
+        return render(request, 'account/add_patent.html', {'form':form, 'invalid':False})
+    else:
+        form = PatentForm(request.POST, request.FILES)
+        if form.is_valid():
+            with database_transaction.atomic():
+                composition = Composition.objects.create(
+                    comp_name = request.POST['comp_name'],
+                    upload_time = timezone.now(),
+                    expert = request.user.expertuser_relation,
+                    price = request.POST['price'],
+                    description = request.POST['description'],
+                )
+                composition.save()
+                patent = Patent.objects.create(
+                    composition = composition,
+                    patent_no = request.POST['patent_no'],
+                    apply_time = request.POST['apply_time'],
+                    auth_time = request.POST['auth_time'],
+                )
+                patent.save()
+                save_appendix(request, composition, 'text_field')
+                save_appendix(request, composition, 'picture_field')
+                save_appendix(request, composition, 'video_field')
+                
+            return HttpResponse('add successfully')
+        else:
+            form = PatentForm()
+            return render(request, 'account/add_patent.html', {'form':form, 'invalid':True})
+
+@login_required()
+#@permission_required('account.verified_expert_permission', raise_exception=True)
+def show_composition_list(request):
+    expert = request.user.expertuser_relation
+    composition_list = Composition.objects.filter(expert = expert)
+
+    return render(request, 'account/show_composition_list.html', {'composition_list' : composition_list})
+
+
+@login_required()
+#@permission_required('account.verified_expert_permission', raise_exception=True)
+def delete_composition(request, pk):
+    if request.method == 'GET':
+        composition = Composition.objects.filter(pk = pk)
+        if composition.count() == 0:
+            return HttpResponse('成果8存在')
+        return render(request, 'account/delete_composition.html', {'composition':composition[0]})
+    elif request.method == 'POST':
+        Composition.objects.filter(pk = pk).delete()
+        return HttpResponse('delete success')
+            

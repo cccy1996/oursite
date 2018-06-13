@@ -1,0 +1,20 @@
+<p>add patent here</p>
+<form method="POST" action="{% url 'account:add_patent' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.comp_name.label}} {{ form.comp_name }}<br>
+    {{ form.price.label}} {{ form.price }}<br>
+    {{ form.description.label }} {{ form.description }}<br>
+
+    {{ form.patent_no.label }} {{ form.patent_no }}<br>
+    {{ form.apply_time.label }} {{ form.apply_time }}<br>
+    {{ form.auth_time.label }} {{ form.auth_time }}<br>
+
+    {{ form.text_field.label }} {{ form.text_field }}<br>
+    {{ form.picture_field.label }} {{ form.picture_field }}<br>
+    {{ form.video_field.label }} {{ form.video_field }}<br>
+    <input type="submit" value="Submit"/>
+</form>
+
+{% if invalid == True%}
+输入信息有错误
+{% endif %}
