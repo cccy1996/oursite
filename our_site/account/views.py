@@ -7,12 +7,15 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.db import transaction as database_transaction
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
+from django.utils import timezone
+import datetime
+from display.models import *
 
 from django.utils import timezone
 from display.models import ExpertDetail
 from customerservice.models import ApplicationForHomepageClaiming, ApplicationForRealNameCertification
 
-from .forms import RealNameForm
+from .forms import *
 
 def account_index(request):
     return render(request, 'account/index.html')
@@ -41,21 +44,27 @@ def commuser_register(request):
                 new_user.user_permissions.add(permission)
                 relation = Commuser_relation(user = new_user, credit = 0)
                 relation.save()
-                login(request, new_user)
-                return redirect('/account/profile/')
+            login(request, new_user)
+            return redirect('/account/profile/')
         return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err' : True})
-        #need a username duplicate check
+
 
 def commuser_login(request):
     if request.method  == 'GET':
         if request.user.is_authenticated:
-            logout(request)
+            #logout(request)
+            return redirect('/account/profile')
         return render(request, 'account/commuser_login.html', {'relog' : False})
     elif request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(request, username = username, password = password)
         if user is not None:
+            #登陆时直接比较登陆时间来增加积分
+            if user.has_perm('account.commuser_permission'):
+                if user.last_login + datetime.timedelta(days = 1) < timezone.now():
+                    user.commuser_relation.credit += 10
+                    user.commuser_relation.save()
             login(request, user)
             return redirect('/account/profile/')
         else:
@@ -130,11 +139,13 @@ def expert_register(request):
                         {'password_err': False, 'username_err': False, 'identity_err': True})
     with database_transaction.atomic():
         new_user = User.objects.create_user(username, email = email, password = password)
-        new_user.user_permissions.add('account.expert_permission')
         new_user.save()
+        content_type = ContentType.objects.get_for_model(User_Permission)
+        permission = Permission.objects.get(content_type = content_type,codename = 'expert_permission')
+        new_user.user_permissions.add(permission)
         expert_profile = Expertuser_relation(user = new_user, name = truename, identity = identity)
         expert_profile.save()
-        return redirect('/account/profile/')
+    return redirect('/account/profile/')
                 
 @login_required(login_url = '/account/login/')
 def expert_claim_homepage(request, homepagepk):
@@ -183,4 +194,210 @@ def certificate_realname(request):
             return render(request, "account/certificate_realname.html",
                             {'form': form, 'invalid': True})
 
-    
+def invite_register(request, inviter_id):
+    if request.method == 'GET':
+        inviter = User.objects.filter(id = inviter_id)
+        if inviter.count() == 0 or inviter[0].has_perm('account.commuser_permission') == False:
+            return HttpResponse("邀请人不存在")
+        return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err': False})
+    elif request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        password_comfirm = request.POST['password_comfirm']
+        email = request.POST['email']
+        
+        try:
+            search_user = User.objects.get(username = username)
+        except Exception:
+            if password != password_comfirm:
+                return render(request, 'account/commuser_register.html', {'password_err': True, 'username_err': False})
+            inviter = User.objects.get(id = inviter_id)
+            with database_transaction.atomic():
+                new_user = User.objects.create_user(username, email = email, password = password)
+                content_type = ContentType.objects.get_for_model(User_Permission)
+                permission = Permission.objects.get(content_type = content_type,codename = 'commuser_permission')
+                new_user.save()
+                new_user.user_permissions.add(permission)
+                relation = Commuser_relation(user = new_user, credit = 0)
+                relation.save()
+                inviter.commuser_relation.credit += 10
+                inviter.commuser_relation.save()
+            login(request, new_user)
+            return redirect('/account/profile/')
+        return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err' : True})
+
+
+def save_appendix(request, composition, type):
+    files = request.FILES.getlist(type)
+    for f in files:
+        appendx = Appendix.objects.create(
+            composition = composition,
+            uploaded = f,
+        )
+        if type == 'text_field':
+            appendx.app_type = 'T'
+        elif type == 'picture_field':
+            appendx.app_type = 'P'
+        else:
+            appendx.app_type = 'V'
+        appendx.save()
+
+@login_required()
+#@permission_required('account.verified_expert_permission', raise_exception=True)
+def add_project(request):
+    if request.method == 'GET':
+        form = ProjectForm()
+        return render(request, 'account/add_project.html', {'form':form, 'invalid':False})
+    else:
+        form = ProjectForm(request.POST, request.FILES)
+        if form.is_valid():
+            with database_transaction.atomic():
+                composition = Composition.objects.create(
+                    comp_name = request.POST['comp_name'],
+                    upload_time = timezone.now(),
+                    expert = request.user.expertuser_relation,
+                    price = request.POST['price'],
+                    description = request.POST['description'],
+                )
+                composition.save()
+                project = Project.objects.create(
+                    composition = composition,
+                    organization = request.POST['organization'],
+                    start_time = request.POST['start_time'],
+                    end_time = request.POST['end_time'],
+                )
+                project.save()
+                
+                save_appendix(request, composition, 'text_field')
+                save_appendix(request, composition, 'picture_field')
+                save_appendix(request, composition, 'video_field')
+                
+            return HttpResponse('add successfully')
+        else:
+            form = ProjectForm()
+            return render(request, 'account/add_project.html', {'form':form, 'invalid':True})
+
+@login_required()
+#@permission_required('account.verified_expert_permission', raise_exception=True)
+def add_project(request):
+    if request.method == 'GET':
+        form = ProjectForm()
+        return render(request, 'account/add_project.html', {'form':form, 'invalid':False})
+    else:
+        form = ProjectForm(request.POST, request.FILES)
+        if form.is_valid():
+            with database_transaction.atomic():
+                composition = Composition.objects.create(
+                    comp_name = request.POST['comp_name'],
+                    upload_time = timezone.now(),
+                    expert = request.user.expertuser_relation,
+                    price = request.POST['price'],
+                    description = request.POST['description'],
+                )
+                composition.save()
+                project = Project.objects.create(
+                    composition = composition,
+                    organization = request.POST['organization'],
+                    start_time = request.POST['start_time'],
+                    end_time = request.POST['end_time'],
+                )
+                project.save()
+                
+                save_appendix(request, composition, 'text_field')
+                save_appendix(request, composition, 'picture_field')
+                save_appendix(request, composition, 'video_field')
+                
+            return HttpResponse('add successfully')
+        else:
+            form = ProjectForm()
+            return render(request, 'account/add_project.html', {'form':form, 'invalid':True})
+
+
+@login_required()
+#@permission_required('account.verified_expert_permission', raise_exception=True)
+def add_paper(request):
+    if request.method == 'GET':
+        form = PaperForm()
+        return render(request, 'account/add_paper.html', {'form':form, 'invalid':False})
+    else:
+        form = PaperForm(request.POST, request.FILES)
+        if form.is_valid():
+            with database_transaction.atomic():
+                composition = Composition.objects.create(
+                    comp_name = request.POST['comp_name'],
+                    upload_time = timezone.now(),
+                    expert = request.user.expertuser_relation,
+                    price = request.POST['price'],
+                    description = request.POST['description'],
+                )
+                composition.save()
+                paper = Paper.objects.create(
+                    composition = composition,
+                    abstract = request.POST['abstract'],
+                    keywords = request.POST['keywords'],
+                )
+                paper.save()
+                save_appendix(request, composition, 'text_field')
+                save_appendix(request, composition, 'picture_field')
+                save_appendix(request, composition, 'video_field')
+                
+            return HttpResponse('add successfully')
+        else:
+            form = PaperForm()
+            return render(request, 'account/add_paper.html', {'form':form, 'invalid':True})
+
+@login_required()
+#@permission_required('account.verified_expert_permission', raise_exception=True)
+def add_patent(request):
+    if request.method == 'GET':
+        form = PatentForm()
+        return render(request, 'account/add_patent.html', {'form':form, 'invalid':False})
+    else:
+        form = PatentForm(request.POST, request.FILES)
+        if form.is_valid():
+            with database_transaction.atomic():
+                composition = Composition.objects.create(
+                    comp_name = request.POST['comp_name'],
+                    upload_time = timezone.now(),
+                    expert = request.user.expertuser_relation,
+                    price = request.POST['price'],
+                    description = request.POST['description'],
+                )
+                composition.save()
+                patent = Patent.objects.create(
+                    composition = composition,
+                    patent_no = request.POST['patent_no'],
+                    apply_time = request.POST['apply_time'],
+                    auth_time = request.POST['auth_time'],
+                )
+                patent.save()
+                save_appendix(request, composition, 'text_field')
+                save_appendix(request, composition, 'picture_field')
+                save_appendix(request, composition, 'video_field')
+                
+            return HttpResponse('add successfully')
+        else:
+            form = PatentForm()
+            return render(request, 'account/add_patent.html', {'form':form, 'invalid':True})
+
+@login_required()
+#@permission_required('account.verified_expert_permission', raise_exception=True)
+def show_composition_list(request):
+    expert = request.user.expertuser_relation
+    composition_list = Composition.objects.filter(expert = expert)
+
+    return render(request, 'account/show_composition_list.html', {'composition_list' : composition_list})
+
+
+@login_required()
+#@permission_required('account.verified_expert_permission', raise_exception=True)
+def delete_composition(request, pk):
+    if request.method == 'GET':
+        composition = Composition.objects.filter(pk = pk)
+        if composition.count() == 0:
+            return HttpResponse('成果8存在')
+        return render(request, 'account/delete_composition.html', {'composition':composition[0]})
+    elif request.method == 'POST':
+        Composition.objects.filter(pk = pk).delete()
+        return HttpResponse('delete success')
+            

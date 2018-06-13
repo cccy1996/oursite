@@ -70,7 +70,7 @@ def affairs(request):
     if not request.user.is_authenticated:
         return redirect("/customerservice/login/")
     if not request.user.has_perm('account.service_permission'):
-        return Http("You don't have admin permission!!!")
+        return HttpResponse("You don't have admin permission!!!")
 
     hptodos = ApplicationForHomepageClaiming.objects.filter(state='S')
     rntodos = ApplicationForRealNameCertification.objects.filter(state='S')
@@ -131,7 +131,7 @@ def realnamecertification_reject(request, appid):
         app.save()
         return redirect("/customerservice/affairs/")
     else:
-        return HttpRespons("How could you get here?")
+        return HttpResponse("How could you get here?")
 
         
 

@@ -1,0 +1,18 @@
+<p>add project here</p>
+<form method="POST" action="{% url 'account:add_project' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.comp_name.label}} {{ form.comp_name }}<br>
+    {{ form.price.label}} {{ form.price }}<br>
+    {{ form.description.label }} {{ form.description }}<br>
+    {{ form.organization.label }} {{ form.organization }}<br>
+    {{ form.start_time.label }} {{ form.start_time }}<br>
+    {{ form.end_time.label }} {{ form.end_time }}<br>
+    {{ form.text_field.label }} {{ form.text_field }}<br>
+    {{ form.picture_field.label }} {{ form.picture_field }}<br>
+    {{ form.video_field.label }} {{ form.video_field }}<br>
+    <input type="submit" value="Submit"/>
+</form>
+
+{% if invalid == True%}
+输入信息有错误
+{% endif %}

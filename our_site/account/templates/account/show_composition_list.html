@@ -1,0 +1,17 @@
+<table>
+    <tr>
+        <td>name</td>
+        <td>upload time</td>
+        <td>price</td>
+        <td>delete?</td>
+    </tr>
+
+    {% for composition in composition_list %}
+    <tr>
+        <td>{{ composition.comp_name }}</td>
+        <td>{{ composition.upload_time }}</td>
+        <td>{{ composition.price }}</td>
+        <td><a href = "{% url 'account:delete_composition' composition.pk %}">delete</a></td>
+    </tr>
+    {% endfor %}
+</table>

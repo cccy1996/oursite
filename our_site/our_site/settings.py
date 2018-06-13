@@ -86,7 +86,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'oursite',
         'USER': 'root',
-        'PASSWORD': '90706991',
+        'PASSWORD': 'cenyi123',
         'HOST': '127.0.0.1',
         'PORT': '3306',
     }
@@ -132,3 +132,5 @@ USE_TZ = True
 STATIC_URL = BASE_DIR + '/static/'
 MEDIA_ROOT = BASE_DIR + '/media/'
 MEDIA_URL = BASE_DIR + '/media/'
+
+LOGIN_URL = '/account/login/'
