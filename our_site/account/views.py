@@ -226,21 +226,49 @@ def invite_register(request, inviter_id):
             return redirect('/account/profile/')
         return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err' : True})
 
+def create_composition(request):
+    composition = Composition.objects.create(
+        comp_name = request.POST['comp_name'],
+        upload_time = timezone.now(),
+        expert = request.user.expertuser_relation,
+        price = request.POST['price'],
+        description = request.POST['description'],
+    )
+    composition.save()
+    return composition
 
-def save_appendix(request, composition, type):
-    files = request.FILES.getlist(type)
+def save_appendix(request, composition):
+    files = request.FILES.getlist('appendixes')
     for f in files:
-        appendx = Appendix.objects.create(
+        appendix = Appendix.objects.create(
             composition = composition,
             uploaded = f,
         )
-        if type == 'text_field':
-            appendx.app_type = 'T'
-        elif type == 'picture_field':
-            appendx.app_type = 'P'
-        else:
-            appendx.app_type = 'V'
-        appendx.save()
+        appendix.save()
+
+def save_display_materials(request, composition):
+    pics = request.FILES.getlist('pictures')
+    for p in pics:
+        pic = DisplayMaterial.objects.create(
+            composition = composition,
+            uploaded = p,
+            material_type = 'P',
+            description = 'a picture',
+        )
+        pic.save()
+    videos = request.FILES.getlist('videos')
+    for v in videos:
+        video  = DisplayMaterial.objects.create(
+            composition = composition,
+            uploaded = p,
+            material_type = 'V',
+            description = 'a video',
+        )
+        video.save()
+
+def save_uploaded(request, composition):
+    save_appendix(request, composition)
+    save_display_materials(request, composition)
 
 @login_required()
 #@permission_required('account.verified_expert_permission', raise_exception=True)
@@ -252,14 +280,7 @@ def add_project(request):
         form = ProjectForm(request.POST, request.FILES)
         if form.is_valid():
             with database_transaction.atomic():
-                composition = Composition.objects.create(
-                    comp_name = request.POST['comp_name'],
-                    upload_time = timezone.now(),
-                    expert = request.user.expertuser_relation,
-                    price = request.POST['price'],
-                    description = request.POST['description'],
-                )
-                composition.save()
+                composition = create_composition(request)            
                 project = Project.objects.create(
                     composition = composition,
                     organization = request.POST['organization'],
@@ -267,46 +288,7 @@ def add_project(request):
                     end_time = request.POST['end_time'],
                 )
                 project.save()
-                
-                save_appendix(request, composition, 'text_field')
-                save_appendix(request, composition, 'picture_field')
-                save_appendix(request, composition, 'video_field')
-                
-            return HttpResponse('add successfully')
-        else:
-            form = ProjectForm()
-            return render(request, 'account/add_project.html', {'form':form, 'invalid':True})
-
-@login_required()
-#@permission_required('account.verified_expert_permission', raise_exception=True)
-def add_project(request):
-    if request.method == 'GET':
-        form = ProjectForm()
-        return render(request, 'account/add_project.html', {'form':form, 'invalid':False})
-    else:
-        form = ProjectForm(request.POST, request.FILES)
-        if form.is_valid():
-            with database_transaction.atomic():
-                composition = Composition.objects.create(
-                    comp_name = request.POST['comp_name'],
-                    upload_time = timezone.now(),
-                    expert = request.user.expertuser_relation,
-                    price = request.POST['price'],
-                    description = request.POST['description'],
-                )
-                composition.save()
-                project = Project.objects.create(
-                    composition = composition,
-                    organization = request.POST['organization'],
-                    start_time = request.POST['start_time'],
-                    end_time = request.POST['end_time'],
-                )
-                project.save()
-                
-                save_appendix(request, composition, 'text_field')
-                save_appendix(request, composition, 'picture_field')
-                save_appendix(request, composition, 'video_field')
-                
+                save_uploaded(request, composition)
             return HttpResponse('add successfully')
         else:
             form = ProjectForm()
@@ -323,24 +305,14 @@ def add_paper(request):
         form = PaperForm(request.POST, request.FILES)
         if form.is_valid():
             with database_transaction.atomic():
-                composition = Composition.objects.create(
-                    comp_name = request.POST['comp_name'],
-                    upload_time = timezone.now(),
-                    expert = request.user.expertuser_relation,
-                    price = request.POST['price'],
-                    description = request.POST['description'],
-                )
-                composition.save()
+                composition = create_composition(request)                
                 paper = Paper.objects.create(
                     composition = composition,
                     abstract = request.POST['abstract'],
                     keywords = request.POST['keywords'],
                 )
                 paper.save()
-                save_appendix(request, composition, 'text_field')
-                save_appendix(request, composition, 'picture_field')
-                save_appendix(request, composition, 'video_field')
-                
+                save_uploaded(request, composition)                
             return HttpResponse('add successfully')
         else:
             form = PaperForm()
@@ -356,14 +328,7 @@ def add_patent(request):
         form = PatentForm(request.POST, request.FILES)
         if form.is_valid():
             with database_transaction.atomic():
-                composition = Composition.objects.create(
-                    comp_name = request.POST['comp_name'],
-                    upload_time = timezone.now(),
-                    expert = request.user.expertuser_relation,
-                    price = request.POST['price'],
-                    description = request.POST['description'],
-                )
-                composition.save()
+                composition = create_composition(request)
                 patent = Patent.objects.create(
                     composition = composition,
                     patent_no = request.POST['patent_no'],
@@ -371,9 +336,7 @@ def add_patent(request):
                     auth_time = request.POST['auth_time'],
                 )
                 patent.save()
-                save_appendix(request, composition, 'text_field')
-                save_appendix(request, composition, 'picture_field')
-                save_appendix(request, composition, 'video_field')
+                save_uploaded(request, composition)
                 
             return HttpResponse('add successfully')
         else:
@@ -388,6 +351,43 @@ def show_composition_list(request):
 
     return render(request, 'account/show_composition_list.html', {'composition_list' : composition_list})
 
+# returns a (type, relevant_entity) pair
+def get_composition_type(composition):
+    try:
+        project = composition.project
+        return ('project', project)
+    except Project.DoesNotExist:
+        try:
+            patent = composition.patent
+            return ('patent', patent)
+        except Patent.DoesNotExist:
+            try:
+                paper = composition.paper
+                return ('paper', paper)
+            except:
+                assert False
+
+@login_required()
+#@permission_required('account.verified_expert_permission', raise_exception=True)
+def composition_detail(request, pk):
+    expert = request.user.expertuser_relation
+    exist = True
+    try:
+        comp = Composition.objects.filter(expert=expert).get(pk=pk)
+    except Composition.DoesNotExist:
+        return render(request, 'account/composition_detail.html', {'exist': False})
+    
+    #appendixes = comp.appendix.objects.all()
+    appendixes = Appendix.objects.filter(composition_id=comp.pk)
+    #for_display = comp.displaymaterial.objects.all()
+    for_display = DisplayMaterial.objects.filter(composition_id=comp.pk)
+
+    pair = get_composition_type(comp)
+
+    return render(request, 'account/composition_detail.html', 
+                    {'exist': True, 'appendixes': appendixes, 'for_display': for_display,
+                     'comp': comp, 'ty': pair[0], 'body': pair[1]})
+
 
 @login_required()
 #@permission_required('account.verified_expert_permission', raise_exception=True)
@@ -400,4 +400,3 @@ def delete_composition(request, pk):
     elif request.method == 'POST':
         Composition.objects.filter(pk = pk).delete()
         return HttpResponse('delete success')
-            

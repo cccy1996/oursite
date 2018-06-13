@@ -56,7 +56,7 @@ class DisplayMaterial(models.Model):
         ('V', 'Video'),
     )
     material_type = models.CharField(max_length=1, choices=FILE_TYPES)
-    uploaded = models.FileField(upload_to=)
+    uploaded = models.FileField(upload_to=composition_display_material_path)
     description = models.CharField(max_length=32, default="")
 
 class ExpertDetail(models.Model):

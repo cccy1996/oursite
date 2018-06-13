@@ -1,0 +1,33 @@
+{% if exist %}
+    <p>It's a {{ ty }}</p>
+    <p>Title: {{ comp.comp_name }}</p>
+    <p>Description:</p> 
+    <p>{{ comp.description }}</p>
+    <p>Price: {{ comp.price }}</p>
+
+    {% if ty == 'project' %}
+
+    {% elif ty == 'patent' %}
+    {% elif ty == 'paper' %}
+    {% else %}
+    {% endif %}
+
+    <h3>展示材料：</h3><br/>
+    {% for m in for_display %}
+        <p>{{ m.description }}: </p>
+        {% if m.material_type == 'P' %}
+            <img url="{{ m.uploaded.url }}"/>
+        {% else %}
+            <p>视频暂时不播了</p>
+        {% endif %}
+        <br/>
+    {% endfor %}
+
+    <h3>附件列表：</h3><br/>
+    {% for appendix in appendixes %}
+        <p>{{ appendix.uploaded.name }}</p>
+    {% endfor %}
+
+{% else %}
+    <p>You don't have a composition whose pk is 这样.</p>
+{% endif %}

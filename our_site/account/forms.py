@@ -9,9 +9,10 @@ class CompositionForm(forms.Form):
     comp_name = forms.CharField(label='composition name', max_length=50)
     price = forms.DecimalField(label = 'price',max_digits=9, decimal_places=1)
     description = forms.CharField(label = 'description',max_length=500)
-    text_field = forms.FileField(label = 'Text appendix',widget=forms.ClearableFileInput(attrs={'multiple': True}), required = False)
-    picture_field = forms.FileField(label = 'Picture appendix',widget=forms.ClearableFileInput(attrs={'multiple': True}), required = False)
-    video_field = forms.FileField(label = 'Video appendix',widget=forms.ClearableFileInput(attrs={'multiple': True}), required = False)
+    appendixes = forms.FileField(label='Appendixes', widget=forms.ClearableFileInput(attrs={'multiple': True}), required=False)
+    pictures = forms.FileField(label='Pictures for display', widget=forms.ClearableFileInput(attrs={'multiple': True}), required=False)
+    videos = forms.FileField(label='Videos for display', widget=forms.ClearableFileInput(attrs={'multiple': True}), required=False)
+
     class Meta:
         abstract = True
 
