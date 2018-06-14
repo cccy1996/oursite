@@ -5,7 +5,7 @@
     {% if message_list %}
     <ul>
     {% for message in message_list %}
-        <li>{{message.inbox_sender}}对{{message.inbox_receiver}}说：<br>消息内容：{{ message.inbox_content }}</li>
+        <li>{{message.inbox_sender}}:{{ message.inbox_content }}</li>
     {% endfor %}
     </ul>
 {% else %}

@@ -38,7 +38,7 @@ def send_message(request):
 
 @login_required(login_url='/account/login/')
 def read_message(request):
-    message_list = Inbox.objects.all()
+    message_list = Inbox.objects.filter(inbox_receiver=request.user)
     template = loader.get_template('message/read_message.html')
     context = {
         'message_list': message_list
