@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+
+    <p>消息列表：</p>
+
+    {% if message_list %}
+    <ul>
+    {% for message in message_list %}
+        <li>{{message.inbox_sender}}对{{message.inbox_receiver}}说：<br>消息内容：{{ message.inbox_content }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No message sent to you.</p>
+{% endif %}
+
+    <tr>
+        <td>
+            <a href="{% url 'message:send' %}">发消息</a><br>
+            <a href="{% url 'message:index' %}">返回</a>
+        </td>
+    </tr>
