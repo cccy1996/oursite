@@ -1,27 +1,13 @@
+
 <table>
     <tr>
-        <td>
-            <a href="{% url 'display:project' %}">project</a>
-        </td>
+        <td>成果列表（显示最近上传的三个）</td>
     </tr>
+    {% for composition in latest_composition_list %}
     <tr>
-        <td>
-            <a href="{% url 'display:paper' %}">paper</a>
-        </td>
+        <td><a href="{% url 'account:composition_detail' composition.pk %}">{{ composition.comp_name }}</a></td>
+        <td>{{ composition.upload_time }}</td>
+        <td>{{ composition.price }}</td>
     </tr>
-    <tr>
-        <td>
-            <a href="{% url 'display:patent' %}">patent</a>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <a href="{% url 'display:detail' %}">detail</a>
-        </td>
-    </tr>
-        <tr>
-        <td>
-            <a href="{% url 'display:membership' %}">membership</a>
-        </td>
-    </tr>
+    {% endfor %}
 </table>

@@ -6,7 +6,6 @@ class Institute(models.Model):
     inst_en_name = models.CharField(max_length=45)
     inst_type = models.CharField(max_length=20)
 
-
 class StudyArea(models.Model):
     area_name = models.CharField(max_length=30) 
 

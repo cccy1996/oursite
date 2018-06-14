@@ -16,7 +16,7 @@ urlpatterns = [
     path('expert/add_patent/', views.add_patent, name = 'add_patent'),
     path('expert/show_composition_list/', views.show_composition_list, name = 'show_composition_list'),
     path('expert/delete_composition/<int:pk>/', views.delete_composition, name = 'delete_composition'),
-    path('expert/compositon_detail/<int:pk>/', views.composition_detail, name='composition_detail'),
+    path('expert/composition_detail/<int:pk>/', views.composition_detail, name='composition_detail'),
 
     path('expert_register/', views.expert_register, name = 'expert_register'),
     path('expert_claim_homepage/<int:homepagepk>/', 
