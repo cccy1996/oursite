@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<table>
+    <form method="POST" action="{% url 'message:send' %}">
+        {% csrf_token %}
+        <table>
+            <tr>
+                <td>username:</td>
+                <td>
+                    {{ username }}
+                </td>
+            </tr>
+            <tr>
+                <td>发送给：</td>
+                <td>
+                    <input type="text" name="to_whom">
+                </td>
+            </tr>
+
+            <tr>
+                <td>消息内容：</td>
+                <td>
+                    <input type="text" name="message_content">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="submit" value="发送">
+                </td>
+            </tr>
+        </table>
+    </form>
+    <br>
+    <tr>
+        <td>
+            <a href="{% url 'message:index' %}">返回</a>
+        </td>
+    </tr>
+</table>
