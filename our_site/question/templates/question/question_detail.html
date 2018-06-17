@@ -8,11 +8,6 @@
     {% else %}
     <tr>
         <td>
-            问题id：{{question.que_id}}
-        </td>
-    </tr>
-    <tr>
-        <td>
             问题标题：{{question.que_title}}
         </td>
     </tr>
@@ -21,5 +16,33 @@
             问题日期：{{question.que_date}}
         </td>
     </tr>
+    <tr>
+        <td>
+            问题描述：{{question.que_content}}
+        </td>
+    </tr>
+    <tr>
+        <td>
+            提问人：{{question.que_user}}
+        </td>
+    </tr>
+    <tr>
+        <td>
+            邀请专家：{{question.ans_expert}}
+        </td>
+    </tr>
+        {% if question.ans_status == 1 %}
+        <tr>
+            <td>
+                专家回答：{{question.ans_content}}
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td>
+                专家尚未回答
+            </td>
+        </tr>
+        {% endif %}
     {% endif %}
 </table>

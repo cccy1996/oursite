@@ -17,11 +17,23 @@ class Question(models.Model):
                                  related_name="commuser_question")
     ans_expert = models.ForeignKey(Expertuser_relation,
                                    on_delete=models.CASCADE,
-                                   related_name="expert_answer", null=True, blank=True)
+                                   related_name="expert_answer")
+
+    @property
+    def que_user_name(self):
+        return self.que_user.name
+
+    @property
+    def ans_expert_name(self):
+        return self.ans_expert.name
 
     def que_info(self):
         return {'que_id': self.que_id,
                 'que_title': self.que_title,
                 'que_date': self.que_date,
                 'que_content': self.que_content,
+                'ans_content': self.ans_content,
+                'ans_expert': self.ans_expert.user.username,
+                'que_user': self.que_user.user.username,
+                'ans_status': self.ans_status,
                 }

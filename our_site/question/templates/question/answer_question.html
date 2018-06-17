@@ -1,0 +1,41 @@
+<form method="POST" action="{% url 'question:answer_question' question.que_id %}">
+    {% csrf_token %}
+    <table>
+        <tr>
+            <td>
+                问题标题：{{question.que_title}}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                问题日期：{{question.que_date}}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                问题描述：{{question.que_content}}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                提问人：{{question.que_user}}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                邀请专家：{{question.ans_expert}}
+            </td>
+        </tr>
+        <tr>
+            <td>我的回复：</td>
+        </tr>
+        <tr>
+            <td><input type="text" name="answer_content"></td>
+        </tr>
+        <tr>
+            <td>
+                <input type="submit" value="submit">
+            </td>
+        </tr>
+    </table>
+</form>

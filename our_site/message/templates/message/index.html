@@ -1,33 +1,18 @@
 <!DOCTYPE html>
 <table>
-    <form method="POST" action="{% url 'account:profile' %}">
-        {% csrf_token %}
-        <table>
-            <tr>
-                <td>to:</td>
-                <td>
-                    <input type="text" name="username">
-                </td>
-            </tr>
-
-            <tr>
-                <td>message:</td>
-                <td>
-                    <input type="text" name="message">
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <input type="submit" value="发送">
-                </td>
-            </tr>
-        </table>
-    </form>
-    <br>
+    <tr>
+        <td>
+            <a href="{% url 'message:send' %}">发消息</a>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="{% url 'message:read' %}">已接收消息</a>
+        </td>
+    </tr>
     <tr>
         <td>
             <a href="{% url 'account:profile' %}">返回个人主页</a>
         </td>
     </tr>
 </table>
-
