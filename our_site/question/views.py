@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .models import Question
-from display.models import Composition
+# from display.models import Composition
 from django.http.response import HttpResponse
 from django.utils import timezone
 from django.shortcuts import redirect

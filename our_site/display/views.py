@@ -11,7 +11,7 @@ from django.contrib.auth.models import Permission
 from django.utils import timezone
 from display.models import ExpertDetail
 
-
+'''
 def display_index(request):
     return render(request, 'display/index.html')
 
@@ -29,3 +29,4 @@ def display_detail(request):
 
 def display_membership(request):
     return render(request, 'display/membership.html')
+'''

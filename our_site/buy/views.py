@@ -1,3 +1,4 @@
+'''
 from django.shortcuts import render
 from .models import Transaction
 from display.models import Composition
@@ -97,3 +98,4 @@ def accept_trans(request, pk):
         trans.is_accept = True
         trans.save()
     return render(request, "buy/accept_trans.html", {'transaction' : trans})
+'''
