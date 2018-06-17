@@ -4,6 +4,6 @@ app_name = 'display'
 
 urlpatterns = [
     path('<int:epk>/', views.display_index, name = 'index'),
-    path('<int:epk>/show_composition_list/', views.show_composition_list, name = 'show_composition_list'),
-    path('<int:epk>/composition_detail/<int:pk>/', views.composition_detail, name='composition_detail'),
+    path('show_composition_list/<int:epk>', views.show_composition_list, name = 'show_composition_list'),
+    path('composition_detail/<int:epk>/<int:pk>/', views.composition_detail, name='composition_detail'),
 ]

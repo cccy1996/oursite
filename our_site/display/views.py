@@ -14,10 +14,12 @@ from account.models import *
 
 
 def display_index(request,epk):
-    latest_composition_list = Composition.objects.filter(expert=epk).order_by('-upload_time')[:3]
-    return render(request, 'display/index.html',{'latest_composition_list':latest_composition_list})
+    expert=epk
+    latest_composition_list = Composition.objects.filter(expert=expert).order_by('-upload_time')[:3]
+    return render(request, 'display/index.html',{'latest_composition_list':latest_composition_list,
+                                                 'expert_id':expert})
 
-def show_composition_list(request):
+def show_composition_list(request,epk):
     expert = request.user.expertuser_relation
     composition_list = Composition.objects.filter(expert = expert)
 
@@ -39,7 +41,7 @@ def get_composition_type(composition):
                 assert False
 
 
-def composition_detail(request, pk):
+def composition_detail(request,epk,pk):
     expert = request.user.expertuser_relation
     exist = True
     try:

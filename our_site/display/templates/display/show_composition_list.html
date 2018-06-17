@@ -7,7 +7,7 @@
 
     {% for composition in composition_list %}
     <tr>
-        <td><a href="{% url 'account:composition_detail' composition.pk %}">{{ composition.comp_name }}</td>
+        <td><a href="{% url 'display:composition_detail' composition.expert_id composition.pk %}">{{ composition.comp_name }}</td>
         <td>{{ composition.upload_time }}</td>
         <td>{{ composition.price }}</td>
     </tr>
