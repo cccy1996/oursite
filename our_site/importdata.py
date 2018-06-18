@@ -7,9 +7,15 @@ from display.models import *
 from django.db import transaction
 import json
 
+class TooLongException(Exception):
+    def __init__(self, err='item too long, skip it'):
+        Exception.__init__(self, err)
+
 def add_authors(paper, data):
     for author in data['authors']:
         if 'org' in author:
+            if len(author['org']) > 255:
+                raise TooLongException()
             s_institute = Institute.objects.filter(inst_name = author['org'])
             
             if len(s_institute) == 1:
@@ -27,7 +33,7 @@ def add_authors(paper, data):
                 expert.save()
                 paper.authors.add(expert)
         else:
-            empty_institute = Institute.objects.get(inst_name = 'for empty')
+            empty_institute = Institute.objects.get(inst_name = 'empty_institute')
             s_author = ExpertDetail.objects.filter(name = author['name'], institute = empty_institute)
             if len(s_author) == 1:
                     paper.authors.add(s_author[0])
@@ -39,6 +45,8 @@ def add_keywords(paper, data):
     if 'keywords' not in data:
         return
     for keyword in data['keywords']:
+        if len(keyword) > 100:
+            raise TooLongException()    
         s_keyword = Keyword.objects.filter(word = keyword)
         if len(s_keyword) == 1:
             paper.keywords.add(s_keyword[0])
@@ -50,6 +58,8 @@ def add_fos(paper, data):
     if 'fos' not in data:
         return
     for field in data['fos']:
+        if len(field) > 255:
+            raise TooLongException()
         s_studyarea = StudyArea.objects.filter(Area_name = field)
         if len(s_studyarea) == 1:
             paper.fos.add(s_studyarea[0])
@@ -80,26 +90,38 @@ def add_page_end(paper, data):
 def add_doc_type(paper, data):
     if 'doc_type' not in data:
         return
+    if len(data['doc_type']) > 20:
+        raise TooLongException()
     paper.doc_type = data['doc_type']
 def add_lang(paper, data):
     if 'lang' not in data:
         return
+    if len(data['lang']) > 20:
+        raise TooLongException()
     paper.lang = data['lang']
 def add_publisher(paper, data):
     if 'publisher' not in data:
         return
+    if len(data['publisher']) > 255:
+        raise TooLongException()
     paper.publisher = data['publisher']
 def add_issn(paper, data):
     if 'issn' not in data:
         return
+    if len(data['issn']) > 30:
+        raise TooLongException()
     paper.issn = data['issn']
 def add_isbn(paper, data):
     if 'isbn' not in data:
         return
+    if len(data['isbn']) > 30:
+        raise TooLongException()
     paper.isbn = data['isbn']
 def add_doi(paper, data):
     if 'doi' not in data:
         return
+    if len(data['doi']) > 50:
+        raise TooLongException()
     paper.doi = data['doi']
 def add_pdf(paper, data):
     if 'pdf' not in data:
@@ -121,46 +143,53 @@ def main(data_path, lines):
         print('read line ', i)
         text = json_file.readline()
         data = json.loads(text)
-        with transaction.atomic():
-            if len(Paper.objects.filter(pk = data['id'])) ==  1:
+        # 舍弃有不正常关键字的对象
+        if 'keywords' in data:
+            if len(data['keywords'][0]) > 100:
                 continue
-            paper = Paper(
-                id = data['id'],
-                title = data['title'],
-                year = data['year']
-            )
-            paper.save()
-            add_authors(paper, data)
-            add_keywords(paper, data)
-            add_fos(paper, data)
-            add_venue(paper, data)
-            add_n_citation(paper, data)
-            add_references(paper, data)
-            add_page_start(paper, data)
-            add_page_end(paper, data)
-            add_doc_type(paper, data)
-            add_lang(paper, data)
-            add_publisher(paper, data)
-            add_issn(paper, data)
-            add_isbn(paper, data)
-            add_doi(paper, data)
-            add_pdf(paper, data)
-            add_url(paper, data)
-            add_abstract(paper, data)
-            paper.save()
+        
+        try:
+            with transaction.atomic():
+                if len(Paper.objects.filter(pk = data['id'])) ==  1:
+                    continue
+                paper = Paper(
+                    id = data['id'],
+                    title = data['title'],
+                    year = data['year']
+                )
+                paper.save()
+                add_authors(paper, data)
+                add_keywords(paper, data)
+                add_fos(paper, data)
+                add_venue(paper, data)
+                add_n_citation(paper, data)
+                add_references(paper, data)
+                add_page_start(paper, data)
+                add_page_end(paper, data)
+                add_doc_type(paper, data)
+                add_lang(paper, data)
+                add_publisher(paper, data)
+                add_issn(paper, data)
+                add_isbn(paper, data)
+                add_doi(paper, data)
+                add_pdf(paper, data)
+                add_url(paper, data)
+                add_abstract(paper, data)
+                paper.save()
+        except TooLongException:
+            pass #跳过这行json
     json_file.close()
 
-def insertempty():
-    s_institute = Institute.objects.filter(inst_name = 'for empty')
-    if len(s_institute) == 1:
-        return 
-    n_institute = Institute(inst_name = 'for empty')
-    n_institute.save()
+
 
 if __name__ == "__main__":
-    insertempty()
-
-    data_path = '/home/elin/code/daxiangmu/mag_papers_166.txt'
-    lines = 100
-    main(data_path, lines)
+    # 添加一个pk为1的空institute
+    try:
+        insts = Institute.objects.get(inst_name = 'empty_institute')
+    except Institute.DoesNotExist:
+        Institute.objects.create(
+            inst_name='empty_institute'
+        )
+    data_path = '/home/shiletong/mag_papers_8/mag_papers_166.txt'
+    main(data_path, 1000)
     print('Done!')

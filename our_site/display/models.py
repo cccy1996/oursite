@@ -3,7 +3,7 @@ from account.models import Expertuser_relation
 
 
 class Keyword(models.Model):
-    word = models.CharField(max_length=255)
+    word = models.CharField(max_length=100)
 
 
 class StudyArea(models.Model):
@@ -24,7 +24,7 @@ class ExpertDetail(models.Model):
 
 class Paper(models.Model):
     id = models.CharField(max_length=40, primary_key=True)
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=512)
     authors = models.ManyToManyField(ExpertDetail, related_name="papers")
     venue = models.TextField(null=True)
     year = models.IntegerField()
@@ -39,7 +39,7 @@ class Paper(models.Model):
     publisher = models.CharField(max_length=255, null=True)
     issn = models.CharField(max_length=30, null=True)
     isbn = models.CharField(max_length=30, null=True)
-    doi = models.CharField(max_length=30, null=True)
+    doi = models.CharField(max_length=50, null=True)
     pdf = models.TextField(null=True)
     url = models.TextField(null=True)
     abstract = models.TextField(null=True)

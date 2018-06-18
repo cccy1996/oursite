@@ -225,7 +225,8 @@ def invite_register(request, inviter_id):
             login(request, new_user)
             return redirect('/account/profile/')
         return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err' : True})
-
+    
+'''
 def create_composition(request):
     composition = Composition.objects.create(
         comp_name = request.POST['comp_name'],
@@ -400,3 +401,4 @@ def delete_composition(request, pk):
     elif request.method == 'POST':
         Composition.objects.filter(pk = pk).delete()
         return HttpResponse('delete success')
+'''

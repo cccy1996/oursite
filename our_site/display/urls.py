@@ -1,11 +1,15 @@
 from django.urls import path
 from . import views
-
 app_name = 'display'
 '''
 urlpatterns = [
-    path('<int:epk>/', views.display_index, name = 'index'),
-    path('<int:epk>/show_composition_list/', views.show_composition_list, name = 'show_composition_list'),
-    path('<int:epk>/composition_detail/<int:pk>/', views.composition_detail, name='composition_detail'),
+    path('', views.display_index, name = 'index'),
+    path('project/', views.display_project, name = 'project'),
+    path('paper/', views.display_paper, name = 'paper'),
+    path('patent/', views.display_patent, name = 'patent'),
+    path('detail/', views.display_detail, name = 'detail'),
+    path('membership/', views.display_membership, name = 'membership'),
 ]
 '''
+
+

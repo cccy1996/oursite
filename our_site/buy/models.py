@@ -1,4 +1,5 @@
 from django.db import models
+'''
 from account.models import Commuser_relation
 from display.models import Paper
 
@@ -15,3 +16,4 @@ class Transaction(models.Model):
     trans_price = models.DecimalField(max_digits=9, decimal_places=1)
     is_accept = models.NullBooleanField()
     is_paid = models.NullBooleanField()
+'''

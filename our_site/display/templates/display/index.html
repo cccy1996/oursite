@@ -2,10 +2,11 @@
 <table>
     <tr>
         <td>成果列表（显示最近上传的三个）</td>
+        <td><a href="{% url 'display:show_composition_list' expert_id %}">查看全部</a></td>
     </tr>
     {% for composition in latest_composition_list %}
     <tr>
-        <td><a href="{% url 'account:composition_detail' composition.pk %}">{{ composition.comp_name }}</a></td>
+        <td><a href="{% url 'display:composition_detail' composition.expert_id composition.pk %}">{{ composition.comp_name }}</a></td>
         <td>{{ composition.upload_time }}</td>
         <td>{{ composition.price }}</td>
     </tr>
