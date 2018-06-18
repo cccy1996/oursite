@@ -12,7 +12,7 @@ from django.utils import timezone
 from display.models import *
 from account.models import *
 
-
+'''
 def display_index(request,epk):
     latest_composition_list = Composition.objects.filter(expert=epk).order_by('-upload_time')[:3]
     return render(request, 'display/index.html',{'latest_composition_list':latest_composition_list})
@@ -57,3 +57,4 @@ def composition_detail(request, pk):
     return render(request, 'display/composition_detail.html',
                   {'exist': True, 'appendixes': appendixes, 'for_display': for_display,
                    'comp': comp, 'ty': pair[0], 'body': pair[1]})
+'''

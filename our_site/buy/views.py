@@ -1,13 +1,13 @@
 from django.shortcuts import render
 from .models import Transaction
-from display.models import Composition
+from display.models import Paper
 from django.http.response import HttpResponse
 from django.utils import timezone
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db import transaction as database_transaction
 
-
+'''
 @login_required(login_url = '/account/login/')
 @permission_required('account.verified_commuser_permission', login_url = '/account/login/', raise_exception=True)
 def trans_info (request, pk):
@@ -97,3 +97,4 @@ def accept_trans(request, pk):
         trans.is_accept = True
         trans.save()
     return render(request, "buy/accept_trans.html", {'transaction' : trans})
+'''
