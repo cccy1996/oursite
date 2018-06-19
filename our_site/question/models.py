@@ -17,7 +17,7 @@ class Question(models.Model):
                                  related_name="commuser_question")
     ans_expert = models.ForeignKey(Expertuser_relation,
                                    on_delete=models.CASCADE,
-                                   related_name="expert_answer")
+                                   related_name="expert_answer", null=True)
 
     @property
     def que_user_name(self):

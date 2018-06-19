@@ -6,6 +6,7 @@ django.setup()
 from display.models import *
 from django.db import transaction
 import json
+import chunksgen
 
 class TooLongException(Exception):
     def __init__(self, err='item too long, skip it'):
@@ -192,4 +193,6 @@ if __name__ == "__main__":
         )
     data_path = '/home/shiletong/mag_papers_8/mag_papers_166.txt'
     main(data_path, 1000)
+    printf('Begin to generate chunks for titles...')
+    chunksgen.gen_for_all()
     print('Done!')
