@@ -40,10 +40,10 @@ INSTALLED_APPS = [
     'account',
     'buy',
     'display',
-    'search',
     'question',
     'message.apps.MessageConfig',
     "customerservice",
+    'search',
 ]
 
 MIDDLEWARE = [

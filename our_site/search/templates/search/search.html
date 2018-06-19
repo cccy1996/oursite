@@ -1,0 +1,20 @@
+<form method="GET" action="{% url 'search:search_list' %}">
+    {% csrf_token %}
+    <input type="radio" checked="checked" name="search_type" value="simple">精简搜索<br>
+    主题:<input type="text" name="simple_search"><br>
+    <input type="radio" name="search_type" value="complex">复杂搜索<br>
+    关键词<input type="text" name="keyword"><br>
+    作者<input type="text" name="author"><br>
+    出版物<select name="type">
+        <option value="conference">Conference</option>
+        <option value="journal">Journal</option>
+        <option value="book">Book</option>
+        <option value="bookchapter">BookChapter</option>
+        <option value="bookreferenceentry">BookReferenceEntry</option>
+        <option value="null">NULL</option>
+    </select>
+    <input type="text" name="publisher"><br>
+    发表时间<input type="number" name="start_year">-<input type="number" name="end_year"><br>
+    <input type="submit" value="提交">
+    
+</form>

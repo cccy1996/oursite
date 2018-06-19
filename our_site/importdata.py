@@ -190,6 +190,6 @@ if __name__ == "__main__":
         Institute.objects.create(
             inst_name='empty_institute'
         )
-    data_path = '/home/shiletong/mag_papers_8/mag_papers_166.txt'
+    data_path = '/home/elin/code/daxiangmu/mag_papers_166.txt'
     main(data_path, 1000)
     print('Done!')
