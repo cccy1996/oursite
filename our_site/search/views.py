@@ -59,20 +59,30 @@ def search_list(request, page = 0):
         return render(request, 'search/search_list.html', {'paper_list' : related_paper})
     else:
         all_empty = True
-        paper_list = Paper.objects.all()
-        text_list = nltk.word_tokenize(request.GET['keyword'])
         order = request.GET['order']
         author = request.GET['author']
         doc_type = request.GET['type']
         publisher = request.GET['publisher']
         start_year = request.GET['start_year']
         end_year = request.GET['end_year']
+        keywords = request.GET['keyword'].strip(' ').split(',')
+        keywords = list(set(keywords)) # unique
+        # print(keywords)
+
+        hit_times = dict()
+        paper_list = Paper.objects.none()
+        for kwd in keywords:
+            papers = Paper.objects.filter(Q(keywords__word__icontains = kwd) 
+                        | Q(chunkfromtitle__chunk__icontains = kwd)).distinct()
+            for p in papers:
+                if p in hit_times:
+                    hit_times[p.pk] += 1
+                else:
+                    hit_times[p.pk] = 1
+            paper_list = paper_list.union(papers)
 
         if request.GET['keyword'] != '':
             all_empty = False
-
-        for text in text_list:
-            paper_list = paper_list.filter(Q(keywords__word__icontains = text) | Q(chunkfromtitle__chunk__icontains = text)).distinct()
 
         if author != '':
             all_empty = False
@@ -95,13 +105,13 @@ def search_list(request, page = 0):
             all_empty = False
             paper_list = paper_list.filter(year__gte = start_year)
         
+        # it's not a queryset anymore
+        paper_list = sorted(paper_list, key=lambda x: hit_times[x.pk], reverse=True)
         if order == 'citation':
-            paper_list = paper_list.order_by('-n_citation')
+            paper_list.sort(key = lambda x : x.n_citation if x.n_citation is not None else 0, reverse = True)
         elif order == 'year':
-            paper_list = paper_list.order_by('-year')
-        else:
-            pass
-            #这里需要做一个相关度排序
+            paper_list.sort(key = lambda x : x.year, reverse = True)
+            
         paper_list = paper_list[20*page:20*(1+page)]
     
         if all_empty == True:
