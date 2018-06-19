@@ -21,7 +21,7 @@ def process_relation(relations, percent):
             relations.pop(r)
 
 def get_list(relations):
-    sorted_relations = sorted(relations)
+    sorted_relations = sorted(relations, key = lambda x : relations[x], reverse = True)
     related_paper = list()
     for r in sorted_relations:
         related_paper.append(Paper.objects.get(pk = r))
@@ -45,11 +45,11 @@ def search_list(request, page = 0):
             relation_list = paper_list.filter(title__icontains = text)
             for paper in relation_list:
                 relation_add(relations, paper)
-        process_relation(relations, 0.5)
+        process_relation(relations, 0.3)
         related_paper = get_list(relations)
 
         if order == 'citation':
-            related_paper.sort(key = lambda x : x.n_citation, reverse = True)
+            related_paper.sort(key = lambda x : x.n_citation if x.n_citation is not None else 0, reverse = True)
         elif order == 'year':
             related_paper.sort(key = lambda x : x.year, reverse = True)
         else:
