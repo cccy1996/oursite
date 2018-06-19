@@ -95,6 +95,8 @@ def search_list(request, page = 0):
             all_empty = False
             paper_list = paper_list.filter(year__gte = start_year)
         
+        
+        
         if order == 'citation':
             paper_list = paper_list.order_by('-n_citation')
         elif order == 'year':
