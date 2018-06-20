@@ -193,6 +193,6 @@ if __name__ == "__main__":
         )
     data_path = '/home/elin/code/daxiangmu/mag_papers_166.txt'
     main(data_path, 1000)
-    printf('Begin to generate chunks for titles...')
+    print('Begin to generate chunks for titles...')
     chunksgen.gen_for_all()
     print('Done!')
