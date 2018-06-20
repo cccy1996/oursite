@@ -10,19 +10,25 @@ from django.contrib.auth.models import Permission
 from django.utils import timezone
 import datetime
 from display.models import *
-
+import json
+from django.http import HttpResponse
 from django.utils import timezone
 from display.models import ExpertDetail
 from customerservice.models import ApplicationForHomepageClaiming, ApplicationForRealNameCertification
 
 from .forms import *
 
-def account_index(request):
-    return render(request, 'account/index.html')
- 
+
+# def account_index(request):
+#   return render(request, 'account/index.html')
+
+
 def commuser_register(request):
     if request.method == 'GET':
-        return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err': False})
+        msg1 = {'password_err': False, 'username_err': False}
+        return HttpResponse(json.dumps(msg1), content_type="application/json")
+        # return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err': False})
+
     elif request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -33,7 +39,9 @@ def commuser_register(request):
             search_user = User.objects.get(username = username)
         except Exception:
             if password != password_comfirm:
-                return render(request, 'account/commuser_register.html', {'password_err': True, 'username_err': False})
+                msg2 = {'password_err': True, 'username_err': False}
+                return HttpResponse(json.dumps(msg2), content_type="application/json")
+                # return render(request, 'account/commuser_register.html', {'password_err': True, 'username_err': False})
             
             with database_transaction.atomic():
                 new_user = User.objects.create_user(username, email = email, password = password)
@@ -46,7 +54,10 @@ def commuser_register(request):
                 relation.save()
             login(request, new_user)
             return redirect('/account/profile/')
-        return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err' : True})
+
+        msg3 = {'password_err': False, 'username_err' : True}
+        return HttpResponse(json.dumps(msg3), content_type="application/json")
+        # return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err' : True})
 
 
 def commuser_login(request):
@@ -54,7 +65,10 @@ def commuser_login(request):
         if request.user.is_authenticated:
             #logout(request)
             return redirect('/account/profile')
-        return render(request, 'account/commuser_login.html', {'relog' : False})
+
+        msg4 = {'relog' : False}
+        return HttpResponse(json.dumps(msg4), content_type="application/json")
+       # return render(request, 'account/commuser_login.html', {'relog' : False})
     elif request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -68,7 +82,9 @@ def commuser_login(request):
             login(request, user)
             return redirect('/account/profile/')
         else:
-            return render(request, 'account/commuser_login.html', {'relog' : True})
+            msg5 = {'relog': False}
+            return HttpResponse(json.dumps(msg5), content_type="application/json")
+           # return render(request, 'account/commuser_login.html', {'relog' : True})
 
 @login_required(login_url = '/account/login/')
 def commuser_profile(request):

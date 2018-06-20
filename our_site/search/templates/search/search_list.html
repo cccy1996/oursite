@@ -1,0 +1,12 @@
+<table>
+    <tr>
+        <td>title</td>
+        <td>n_citation</td>
+    </tr>
+    {% for paper in paper_list %}
+    <tr>
+        <td>{{paper.title}}</td>
+        <td>{{paper.n_citation}}</td>
+    </tr>
+    {%endfor%}
+</table>

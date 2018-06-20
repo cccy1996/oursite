@@ -6,6 +6,7 @@ django.setup()
 from display.models import *
 from django.db import transaction
 import json
+import chunksgen
 
 class TooLongException(Exception):
     def __init__(self, err='item too long, skip it'):
@@ -33,7 +34,7 @@ def add_authors(paper, data):
                 expert.save()
                 paper.authors.add(expert)
         else:
-            empty_institute = Institute.objects.get(pk = 1)
+            empty_institute = Institute.objects.get(inst_name = 'empty_institute')
             s_author = ExpertDetail.objects.filter(name = author['name'], institute = empty_institute)
             if len(s_author) == 1:
                     paper.authors.add(s_author[0])
@@ -185,11 +186,13 @@ def main(data_path, lines):
 if __name__ == "__main__":
     # 添加一个pk为1的空institute
     try:
-        insts = Institute.objects.get(pk=1)
+        insts = Institute.objects.get(inst_name = 'empty_institute')
     except Institute.DoesNotExist:
         Institute.objects.create(
             inst_name='empty_institute'
         )
-    data_path = '/home/shiletong/mag_papers_8/mag_papers_166.txt'
+    data_path = '/home/elin/code/daxiangmu/mag_papers_166.txt'
     main(data_path, 1000)
+    printf('Begin to generate chunks for titles...')
+    chunksgen.gen_for_all()
     print('Done!')
