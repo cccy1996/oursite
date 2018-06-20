@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.db import transaction as database_transaction
 from account.models import Commuser_relation, Expertuser_relation
 from django.contrib.auth.models import User
-
+import json
 
 def question_index(request):
     return render(request, 'question/index.html')
@@ -18,7 +18,9 @@ def question_index(request):
 @permission_required('account.commuser_permission')
 def consumer_ask_question(request):
     if request.method == 'GET':
-        return render(request, 'question/ask_question.html', {'username': request.user.username})
+        msg1 = {'username': request.user.username}
+        return HttpResponse(json.dumps(msg1), content_type="application/json")
+        # return render(request, 'question/ask_question.html', {'username': request.user.username})
     elif request.method == 'POST':
         question_title = request.POST['question_title']
         question_content = request.POST['question_content']
@@ -34,41 +36,55 @@ def consumer_ask_question(request):
                 question.save()
             return redirect('/question')
         else:
-            return HttpResponse("title and expertID cannot be null")
+            msg2 = {'msg': "title and expertID cannot be null"}
+            return HttpResponse(json.dumps(msg2), content_type="application/json")
+            # return HttpResponse("title and expertID cannot be null")
     else:
-        return HttpResponse("what are you fucking doing!")
+        msg3 = {'msg': "what are you fucking doing!"}
+        return HttpResponse(json.dumps(msg3), content_type="application/json")
+        # return HttpResponse("what are you fucking doing!")
 
 
 @login_required(login_url='/account/login/')
 def question_list(request, quetype):
     if quetype not in [0, 1]:
-        return HttpResponse("quetype must be 0 or 1")
+        msg4 = {'msg': "quetype must be 0 or 1"}
+        return HttpResponse(json.dumps(msg4), content_type="application/json")
+        # return HttpResponse("quetype must be 0 or 1")
     if request.user.has_perm('account.commuser_permission'):
         questions = Question.objects.filter(que_user__user=request.user, ans_status=quetype)
     elif request.user.has_perm('account.expert_permission'):
         questions = Question.objects.filter(ans_expert__user=request.user, ans_status=quetype)
     else:
-        return HttpResponse("you don't have permission")
+        msg5 = {'msg':"you don't have permission"}
+        return HttpResponse(json.dumps(msg5), content_type="application/json")
+        # return HttpResponse("you don't have permission")
     results = []
     for que in questions:
         results.append(que.que_info())
-    return render(request, 'question/question_list.html', {'que_list': results})
+    msg6 = {'que_list': results}
+    return HttpResponse(json.dumps(msg6), content_type="application/json")
+    # return render(request, 'question/question_list.html', {'que_list': results})
 
 
 @login_required(login_url='/account/login/')
 def question_detail(request, queid):
     try:
         question = Question.objects.get(pk=queid)
-        result = {'question': question.que_info(),
+        msg7 = {'question': question.que_info(),
                   'query_error': False}
     except Question.DoesNotExist:
-        result = {'query_error': True}
-        return render(request, 'question/question_detail.html', result)
+        # result = {'query_error': True}
+        msg7 = {'query_error': True}
+        return HttpResponse(json.dumps(msg7), content_type="application/json")
+        # return render(request, 'question/question_detail.html', result)
 
     if request.user.has_perm('account.expert_permission') and question.ans_status == 0:
-        return render(request, 'question/answer_question.html', result)
+        return HttpResponse(json.dumps(msg7), content_type="application/json")
+        # return render(request, 'question/answer_question.html', result)
     else:
-        return render(request, 'question/question_detail.html', result)
+        return HttpResponse(json.dumps(msg7), content_type="application/json")
+        # return render(request, 'question/question_detail.html', result)
 
 
 @login_required(login_url='/account/login/')
@@ -84,6 +100,10 @@ def expert_answer_question(request, queid):
                 question.save()
             return redirect('/question')
         except Question.DoesNotExist:
-            return HttpResponse("问题不存在？？？")
+            msg8 = {'msg': "问题不存在？？？"}
+            return HttpResponse(json.dumps(msg8), content_type="application/json")
+            # return HttpResponse("问题不存在？？？")
     else:
-        return HttpResponse("答案不能为空")
+        msg9 = {'msg': "答案不能为空"}
+        return HttpResponse(json.dumps(msg9), content_type="application/json")
+        # return HttpResponse("答案不能为空")

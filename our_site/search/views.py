@@ -3,7 +3,8 @@ from django.http import HttpResponse
 import nltk
 from display.models import Paper
 from django.db.models import Q, F
-
+from django.core import serializers
+import json
 def relation_add(relations, paper):
     if paper.pk in relations:
         relations[paper.pk] += 1
@@ -54,9 +55,10 @@ def search_list(request, page = 0):
             related_paper.sort(key = lambda x : x.year, reverse = True)
         else:
             pass
-        related_paper = related_paper[20*page:20*(1+page)]
-        
-        return render(request, 'search/search_list.html', {'paper_list' : related_paper})
+        # related_paper = related_paper[20*page:20*(1+page)]
+        json_data = serializers.serialize("json", related_paper[20*page:20*(1+page)])
+        return HttpResponse(json_data, content_type="application/json")
+        # return render(request, 'search/search_list.html', {'paper_list' : related_paper})
     else:
         all_empty = True
         order = request.GET['order']
@@ -116,4 +118,6 @@ def search_list(request, page = 0):
     
         if all_empty == True:
             return redirect('/search/')
-        return render(request, 'search/search_list.html', {'paper_list' : paper_list})
+        msg15 = {'paper_list': paper_list}
+        return HttpResponse(json.dumps(msg15), content_type="application/json")
+        # return render(request, 'search/search_list.html', {'paper_list' : paper_list})

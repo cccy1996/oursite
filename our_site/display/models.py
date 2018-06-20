@@ -20,6 +20,7 @@ class ExpertDetail(models.Model):
     class Meta:
         unique_together=('name', 'institute')
 
+
 class Paper(models.Model):
     id = models.CharField(max_length=40, primary_key=True)
     title = models.CharField(max_length=512)
