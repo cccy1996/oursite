@@ -17,17 +17,18 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from . import settings
-
-'''urlpatterns = [
+'''
+urlpatterns = [
     path('admin/', admin.site.urls),
     path('account/', include('account.urls')),
     # path('buy/', include('buy.urls')),
     path('message/', include('message.urls')),
     path('customerservice/', include('customerservice.urls')),
     path('question/', include('question.urls')),
-    #path('display/', include('display.urls')),
+    path('display/', include('display.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 '''
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('account/', include('account.urls')),
@@ -35,4 +36,5 @@ urlpatterns = [
     path('customerservice/', include('customerservice.urls')),
     path('question/', include('question.urls')),
     path('search/', include('search.urls')),
+    path('display/', include('display.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

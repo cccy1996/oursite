@@ -5,13 +5,11 @@ from account.models import Expertuser_relation
 class Keyword(models.Model):
     word = models.CharField(max_length=100)
 
-
 class StudyArea(models.Model):
     Area_name = models.CharField(max_length=255)
 
 class Institute(models.Model):
     inst_name = models.CharField(max_length=255)
-
 
 class ExpertDetail(models.Model):
     # a primary key defined in order to avoid repeating
