@@ -19,8 +19,8 @@ from customerservice.models import ApplicationForHomepageClaiming, ApplicationFo
 from .forms import *
 
 
-# def account_index(request):
-#   return render(request, 'account/index.html')
+def account_index(request):
+   return render(request, 'account/index.html')
 
 
 def commuser_register(request):
