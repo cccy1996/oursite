@@ -40,10 +40,10 @@ INSTALLED_APPS = [
     'account',
     'buy',
     'display',
-    'search',
     'question',
     'message.apps.MessageConfig',
     "customerservice",
+    'search',
 ]
 
 MIDDLEWARE = [
@@ -130,7 +130,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
-MEDIA_ROOT = BASE_DIR + '/media/'
+MEDIA_ROOT = 'media'
 MEDIA_URL = '/media/'
 
 LOGIN_URL = '/account/login/'

@@ -1,7 +1,7 @@
 {% if exist %}
     <p>It's a {{ ty }}</p>
     <p>Title: {{ comp.comp_name }}</p>
-    <p>Description:</p> 
+    <p>Description:</p>
     <p>{{ comp.description }}</p>
     <p>Price: {{ comp.price }}</p>
 
@@ -16,7 +16,7 @@
     {% for m in for_display %}
         <p>{{ m.description }}: </p>
         {% if m.material_type == 'P' %}
-        <img url="{{ m.uploaded.url }}" style="max-width:100%;"/>
+            <img url="{{ m.uploaded.url }}"/>
         {% else %}
             <p>视频暂时不播了</p>
         {% endif %}
