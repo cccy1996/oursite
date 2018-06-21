@@ -17,8 +17,6 @@ class ExpertDetail(models.Model):
     name = models.CharField(max_length=100) #find a name length 68!
     account = models.OneToOneField(Expertuser_relation, on_delete=models.SET_NULL, null=True)
     institute = models.ForeignKey(Institute, related_name="members", on_delete = models.SET_NULL, null = True)
-    def natural_key(self):
-        return (self.custompk, self.name)
     class Meta:
         unique_together=('name', 'institute')
 

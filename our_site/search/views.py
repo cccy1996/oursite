@@ -57,27 +57,27 @@ def search_list(request, page = 0):
         else:
             pass
         related_paper = related_paper[20*page:20*(1+page)]
-        json_data = serializers.serialize('json', related_paper, 
-        )
-        '''
+        
+        
         json_data = ''
         for paper in related_paper:
             js = {
                 'title' : paper.title, 'paper_id' : paper.id, 'year': paper.year,
                 'doc_type' : paper.doc_type, 'n_citation' : paper.n_citation, 
-                'authors' : list(),
+                'publisher' : paper.publisher, 'authors' : list(),
             }
             for author in paper.authors.all():
                 js['authors'].append({
-                    'name' : author.name, 'id': author.custompk, 'institute' : author.institute
+                    'name' : author.name, 'id': author.custompk,
                 })
             json_data += (json.dumps(js)) +  '\n'
+        '''
         with open('/home/elin/file.json', 'w') as out:
             out.write(json_data)
         '''
 
         return HttpResponse(json_data, content_type="application/json")
-        # return render(request, 'search/search_list.html', {'paper_list' : related_paper})
+        #return render(request, 'search/search_list.html', {'paper_list' : related_paper})
     else:
         all_empty = True
         order = request.GET['order']
@@ -137,6 +137,19 @@ def search_list(request, page = 0):
     
         if all_empty == True:
             return redirect('/search/')
-        msg15 = {'paper_list': paper_list}
-        return HttpResponse(json.dumps(msg15), content_type="application/json")
+        
+        json_data = ''
+        for paper in related_paper:
+            js = {
+                'title' : paper.title, 'paper_id' : paper.id, 'year': paper.year,
+                'doc_type' : paper.doc_type, 'n_citation' : paper.n_citation, 
+                'publisher' : paper.publisher, 'authors' : list(),
+            }
+            for author in paper.authors.all():
+                js['authors'].append({
+                    'name' : author.name, 'id': author.custompk,
+                })
+            json_data += (json.dumps(js)) +  '\n'
+        
+        return HttpResponse(json_data, content_type="application/json")
         # return render(request, 'search/search_list.html', {'paper_list' : paper_list})
