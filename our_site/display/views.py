@@ -4,9 +4,9 @@ from display.models import *
 import json
 
 
-def expert_detail(request):
-    expert_account=request.user.expertuser_relation
-    expert=ExpertDetail.objects.get(account=expert_account)
+def expert_detail(request,id):
+    #expert_account=request.user.expertuser_relation
+    expert=ExpertDetail.objects.get(account=id)
     name=expert.name
     institute=expert.institute.inst_name
     paper_list = expert.papers.all()
