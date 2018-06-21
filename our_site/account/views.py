@@ -106,6 +106,7 @@ def commuser_profile(request):
         jsondict['isexpert'] = True
         try:
             homepage = expert.expertdetail
+            jsondict['homepagepk'] = homepage.pk
         except ExpertDetail.DoesNotExist:
             pass
     else:
@@ -184,44 +185,43 @@ def expert_register(request):
 
 
 @login_required(login_url = '/account/login/')
+
 def expert_claim_homepage(request, homepagepk):
     user = request.user
     expert = user.expertuser_relation
     try:
-        detail = expert.expertdetail
-        msg15 = {'msg': "you've already had a homepage"}
-        return HttpResponse(json.dumps(msg15), content_type="application/json")
+        detail = expert.expertdetail        
+        jsondict = {'already_have_one_err': True, 'not_owned_err': False}
+        return HttpResponse(json.dumps(jsondict), content_type="application/json")
         # return HttpResponse("you've already had a homepage")
     except ExpertDetail.DoesNotExist:
         # this is the correct branch
         try:
             wanted = ExpertDetail.objects.get(pk=homepagepk)
         except ExpertDetail.DoesNotExist:
-            msg16 = {'msg': "this user doesn't have a home page"}
-            return HttpResponse(json.dumps(msg16), content_type="application/json")
-            # return HttpResponse("this user doesn't have a home page")
+            raise Http404('')            
         if wanted.name != expert.name:
-            msg17 = {'msg': "连名字都不一样"}
-            return HttpResponse(json.dumps(msg17), content_type="application/json")
-            # return HttpResponse("连名字都不一样")
+            jsondict = {'not_owned_err': True, 'already_have_one_err': False}
+            return HttpResponse(json.dumps(jsondict), content_type="application/json")
         apply = ApplicationForHomepageClaiming.objects.create(
             expert=expert, homepage=wanted, date=timezone.now(), state='S',
         )
         apply.save()
 
-        return redirect('/account/expert_profile/')
+        return redirect('/account/profile/')
 
 @login_required(login_url = '/account/login/')
 def certificate_realname(request):
     user = request.user
     if user.has_perm('account.verified_expert_permission') or user.has_perm(
         'account.verified_commuser_permission'):
-        msg18 = {'msg': "你已经认证过了"}
-        return HttpResponse(json.dumps(msg18), content_type="application/json")
+        jsondict = {'already_certificated': True}
+        return HttpResponse(json.dumps(jsondict), content_type="application/json")
         # return HttpResponse("你已经认证过了")
     if request.method == 'GET':
         form = RealNameForm()
         msg19 = {'form': form, 'invalid': False}
+
         return HttpResponse(json.dumps(msg19), content_type="application/json")
         # return render(request,
                 # "account/certificate_realname.html", {'form': form, 'invalid': False})
@@ -234,8 +234,9 @@ def certificate_realname(request):
                 pic=request.FILES['pic'], state='S',
             )
             application.save()
-            msg20 = {'msg': "application commited successfully! please wait for shenhe"}
-            return HttpResponse(json.dumps(msg20), content_type="application/json")
+            """ msg20 = {'msg': "application commited successfully! please wait for shenhe"}
+            return HttpResponse(json.dumps(msg20), content_type="application/json") """
+            return redirect('/account/profile/')
             # return HttpResponse("application commited successfully! please wait for shenhe")
         else:
             form = RealNameForm()
