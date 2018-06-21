@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.shortcuts import redirect
 from django.template import loader
+import json
+from django.core import serializers
 
 
 def message_index(request):
@@ -15,12 +17,16 @@ def message_index(request):
 @login_required(login_url='/account/login/')
 def send_message(request):
     if request.method == 'GET':
-        return render(request, 'message/send_message.html', {'username': request.user.username})
+        msg1 = {'username': request.user.username}
+        return HttpResponse(json.dumps(msg1), content_type="application/json")
+        # return render(request, 'message/send_message.html', {'username': request.user.username})
     elif request.method == 'POST':
         message_to = request.POST['to_whom']
         message_content = request.POST['message_content']
         if message_to == '':
-            return HttpResponse("whom do you want to send message to?")
+            msg2 = {'msg': "whom do you want to send message to?"}
+            return HttpResponse(json.dumps(msg2), content_type="application/json")
+            # return HttpResponse("whom do you want to send message to?")
 
         else:
             try:
@@ -33,14 +39,20 @@ def send_message(request):
                 inbox.save()
                 return redirect('/message')
             except Exception:
-                return HttpResponse("there is no people named %s" % message_to)
+                msg3 = {'msg':"there is no people named %s" % message_to}
+                return HttpResponse(json.dumps(msg3), content_type="application/json")
+                # return HttpResponse("there is no people named %s" % message_to)
 
 
 @login_required(login_url='/account/login/')
 def read_message(request):
     message_list = Inbox.objects.filter(inbox_receiver=request.user)
+    '''
     template = loader.get_template('message/read_message.html')
     context = {
         'message_list': message_list
     }
-    return HttpResponse(template.render(context, request))
+    '''
+    json_data = serializers.serialize("json", Inbox.objects.filter(inbox_receiver=request.user))
+    return HttpResponse(json_data, content_type="application/json")
+    # return HttpResponse(template.render(context, request))

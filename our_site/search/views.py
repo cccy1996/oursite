@@ -3,6 +3,8 @@ from django.http import HttpResponse
 import nltk
 from display.models import Paper
 from django.db.models import Q, F
+from django.core import serializers
+import json
 
 def relation_add(relations, paper):
     if paper.pk in relations:
@@ -55,24 +57,53 @@ def search_list(request, page = 0):
         else:
             pass
         related_paper = related_paper[20*page:20*(1+page)]
-        
-        return render(request, 'search/search_list.html', {'paper_list' : related_paper})
+        json_data = serializers.serialize('json', related_paper, 
+        )
+        '''
+        json_data = ''
+        for paper in related_paper:
+            js = {
+                'title' : paper.title, 'paper_id' : paper.id, 'year': paper.year,
+                'doc_type' : paper.doc_type, 'n_citation' : paper.n_citation, 
+                'authors' : list(),
+            }
+            for author in paper.authors.all():
+                js['authors'].append({
+                    'name' : author.name, 'id': author.custompk, 'institute' : author.institute
+                })
+            json_data += (json.dumps(js)) +  '\n'
+        with open('/home/elin/file.json', 'w') as out:
+            out.write(json_data)
+        '''
+
+        return HttpResponse(json_data, content_type="application/json")
+        # return render(request, 'search/search_list.html', {'paper_list' : related_paper})
     else:
         all_empty = True
-        paper_list = Paper.objects.all()
-        text_list = nltk.word_tokenize(request.GET['keyword'])
         order = request.GET['order']
         author = request.GET['author']
         doc_type = request.GET['type']
         publisher = request.GET['publisher']
         start_year = request.GET['start_year']
         end_year = request.GET['end_year']
+        keywords = request.GET['keyword'].strip(' ').split(',')
+        keywords = list(set(keywords)) # unique
+        # print(keywords)
+
+        hit_times = dict()
+        paper_list = Paper.objects.none()
+        for kwd in keywords:
+            papers = Paper.objects.filter(Q(keywords__word__icontains = kwd) 
+                        | Q(chunkfromtitle__chunk__icontains = kwd)).distinct()
+            for p in papers:
+                if p in hit_times:
+                    hit_times[p.pk] += 1
+                else:
+                    hit_times[p.pk] = 1
+            paper_list = paper_list.union(papers)
 
         if request.GET['keyword'] != '':
             all_empty = False
-
-        for text in text_list:
-            paper_list = paper_list.filter(Q(keywords__word__icontains = text) | Q(chunkfromtitle__chunk__icontains = text)).distinct()
 
         if author != '':
             all_empty = False
@@ -95,17 +126,17 @@ def search_list(request, page = 0):
             all_empty = False
             paper_list = paper_list.filter(year__gte = start_year)
         
-        
-        
+        # it's not a queryset anymore
+        paper_list = sorted(paper_list, key=lambda x: hit_times[x.pk], reverse=True)
         if order == 'citation':
-            paper_list = paper_list.order_by('-n_citation')
+            paper_list.sort(key = lambda x : x.n_citation if x.n_citation is not None else 0, reverse = True)
         elif order == 'year':
-            paper_list = paper_list.order_by('-year')
-        else:
-            pass
-            #这里需要做一个相关度排序
+            paper_list.sort(key = lambda x : x.year, reverse = True)
+            
         paper_list = paper_list[20*page:20*(1+page)]
     
         if all_empty == True:
             return redirect('/search/')
-        return render(request, 'search/search_list.html', {'paper_list' : paper_list})
+        msg15 = {'paper_list': paper_list}
+        return HttpResponse(json.dumps(msg15), content_type="application/json")
+        # return render(request, 'search/search_list.html', {'paper_list' : paper_list})

@@ -10,19 +10,25 @@ from django.contrib.auth.models import Permission
 from django.utils import timezone
 import datetime
 from display.models import *
-
+import json
+from django.http import HttpResponse
 from django.utils import timezone
 from display.models import ExpertDetail
 from customerservice.models import ApplicationForHomepageClaiming, ApplicationForRealNameCertification
 
 from .forms import *
 
+
 def account_index(request):
-    return render(request, 'account/index.html')
- 
+   return render(request, 'account/index.html')
+
+
 def commuser_register(request):
     if request.method == 'GET':
-        return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err': False})
+        msg1 = {'password_err': False, 'username_err': False}
+        return HttpResponse(json.dumps(msg1), content_type="application/json")
+        # return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err': False})
+
     elif request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -33,7 +39,9 @@ def commuser_register(request):
             search_user = User.objects.get(username = username)
         except Exception:
             if password != password_comfirm:
-                return render(request, 'account/commuser_register.html', {'password_err': True, 'username_err': False})
+                msg2 = {'password_err': True, 'username_err': False}
+                return HttpResponse(json.dumps(msg2), content_type="application/json")
+                # return render(request, 'account/commuser_register.html', {'password_err': True, 'username_err': False})
             
             with database_transaction.atomic():
                 new_user = User.objects.create_user(username, email = email, password = password)
@@ -46,7 +54,10 @@ def commuser_register(request):
                 relation.save()
             login(request, new_user)
             return redirect('/account/profile/')
-        return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err' : True})
+
+        msg3 = {'password_err': False, 'username_err': True}
+        return HttpResponse(json.dumps(msg3), content_type="application/json")
+        # return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err' : True})
 
 
 def commuser_login(request):
@@ -54,7 +65,10 @@ def commuser_login(request):
         if request.user.is_authenticated:
             #logout(request)
             return redirect('/account/profile')
-        return render(request, 'account/commuser_login.html', {'relog' : False})
+
+        msg4 = {'relog' : False}
+        return HttpResponse(json.dumps(msg4), content_type="application/json")
+       # return render(request, 'account/commuser_login.html', {'relog' : False})
     elif request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -68,7 +82,9 @@ def commuser_login(request):
             login(request, user)
             return redirect('/account/profile/')
         else:
-            return render(request, 'account/commuser_login.html', {'relog' : True})
+            msg5 = {'relog': False}
+            return HttpResponse(json.dumps(msg5), content_type="application/json")
+           # return render(request, 'account/commuser_login.html', {'relog' : True})
 
 @login_required(login_url = '/account/login/')
 def commuser_profile(request):
@@ -76,16 +92,22 @@ def commuser_profile(request):
         commuser = request.user.commuser_relation
         try:
             realnameinfo = request.user.realnameinfo
-            return render(request, 'account/commuser_profile.html', 
-                    {'commuser' : commuser, 'realnameinfo': realnameinfo})
+            msg6 = {'commuser' : commuser, 'realnameinfo': realnameinfo}
+            return HttpResponse(json.dumps(msg6), content_type="application/json")
+          #  return render(request, 'account/commuser_profile.html',
+           #         {'commuser' : commuser, 'realnameinfo': realnameinfo})
         except RealNameInfo.DoesNotExist:
-            return render(request, 'account/commuser_profile.html', 
-                    {'commuser' : commuser, 'realnameinfo': None})
+            msg7 = {'commuser' : commuser, 'realnameinfo': None}
+            return HttpResponse(json.dumps(msg7), content_type="application/json")
+            # return render(request, 'account/commuser_profile.html',
+                    # {'commuser' : commuser, 'realnameinfo': None})
         
     elif request.user.has_perm('account.expert_permission'):
         expert = request.user.expertuser_relation
-        return render(request, 'account/expert_profile.html',
-                    {'isexpert': True, 'expert': expert})
+        msg8 = {'isexpert': True, 'expert': expert}
+        return HttpResponse(json.dumps(msg8), content_type="application/json")
+        # return render(request, 'account/expert_profile.html',
+                    # {'isexpert': True, 'expert': expert})
     else:
         return HttpResponse("error page")
 
@@ -97,7 +119,9 @@ def user_logout(request):
 @login_required(login_url = '/account/login/')
 def user_change_password(request):
     if request.method == 'GET':
-        return render(request, 'account/change_password.html', { 'old_password_err' : False, 'new_password_err' : False})
+        msg9 = {'old_password_err' : False, 'new_password_err': False}
+        return HttpResponse(json.dumps(msg9), content_type="application/json")
+        # return render(request, 'account/change_password.html', { 'old_password_err' : False, 'new_password_err' : False})
     elif request.method == 'POST':
         username = request.POST['username']
         old_password = request.POST['old_password']
@@ -111,14 +135,18 @@ def user_change_password(request):
                 user.save()
                 return redirect('/account/logout')
             else:
-                return render(request, 'account/change_password.html', { 'old_password_err' : False, 'new_password_err' : True})
+                msg10 = {'old_password_err': False, 'new_password_err': False}
+                return HttpResponse(json.dumps(msg10), content_type="application/json")
+                # return render(request, 'account/change_password.html', { 'old_password_err' : False, 'new_password_err' : True})
         else:
             return render(request, 'account/change_password.html', { 'old_password_err' : True, 'new_password_err' : False})
 
 def expert_register(request):
     if request.method == 'GET':
-        return render(request, "account/expert_register.html", 
-                        {'password_err': False, 'username_err': False, 'identity_err': False})
+        msg11 ={'password_err': False, 'username_err': False, 'identity_err': False}
+        return HttpResponse(json.dumps(msg11), content_type="application/json")
+        # return render(request, "account/expert_register.html",
+                        # {'password_err': False, 'username_err': False, 'identity_err': False})
     elif request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -127,16 +155,22 @@ def expert_register(request):
         truename = request.POST['truename']
         identity = request.POST['identity']
     if password != password_confirm:
-        return render(request, 'account/expert_register.html', 
-                        {'password_err': True, 'username_err': False, 'identity_err': False})
+        msg12 = {'password_err': True, 'username_err': False, 'identity_err': False}
+        return HttpResponse(json.dumps(msg12), content_type="application/json")
+        # return render(request, 'account/expert_register.html',
+                        # {'password_err': True, 'username_err': False, 'identity_err': False})
     got = User.objects.filter(username=username)
     if (got.count() != 0):
-        return render(request, 'account/expert_register.html', 
-                        {'password_err': False, 'username_err': True, 'identity_err': False})
+        msg13 =  {'password_err': False, 'username_err': True, 'identity_err': False}
+        return HttpResponse(json.dumps(msg13), content_type="application/json")
+        # return render(request, 'account/expert_register.html',
+                        # {'password_err': False, 'username_err': True, 'identity_err': False})
     got = Expertuser_relation.objects.filter(user__username=truename)
     if (got.count() != 0):
-        return render(request, 'account/expert_register.html', 
-                        {'password_err': False, 'username_err': False, 'identity_err': True})
+        msg14 = {'password_err': False, 'username_err': False, 'identity_err': True}
+        return HttpResponse(json.dumps(msg14), content_type="application/json")
+        # return render(request, 'account/expert_register.html',
+                        # {'password_err': False, 'username_err': False, 'identity_err': True})
     with database_transaction.atomic():
         new_user = User.objects.create_user(username, email = email, password = password)
         new_user.save()
@@ -146,22 +180,29 @@ def expert_register(request):
         expert_profile = Expertuser_relation(user = new_user, name = truename, identity = identity)
         expert_profile.save()
     return redirect('/account/profile/')
-                
+
+
 @login_required(login_url = '/account/login/')
 def expert_claim_homepage(request, homepagepk):
     user = request.user
     expert = user.expertuser_relation
     try:
         detail = expert.expertdetail
-        return HttpResponse("you've already had a homepage")
+        msg15 = {'msg': "you've already had a homepage"}
+        return HttpResponse(json.dumps(msg15), content_type="application/json")
+        # return HttpResponse("you've already had a homepage")
     except ExpertDetail.DoesNotExist:
         # this is the correct branch
         try:
             wanted = ExpertDetail.objects.get(pk=homepagepk)
         except ExpertDetail.DoesNotExist:
-            return HttpResponse("this user doesn't have a home page")
+            msg16 = {'msg': "this user doesn't have a home page"}
+            return HttpResponse(json.dumps(msg16), content_type="application/json")
+            # return HttpResponse("this user doesn't have a home page")
         if wanted.name != expert.name:
-            return HttpResponse("连名字都不一样")
+            msg17 = {'msg': "连名字都不一样"}
+            return HttpResponse(json.dumps(msg17), content_type="application/json")
+            # return HttpResponse("连名字都不一样")
         apply = ApplicationForHomepageClaiming.objects.create(
             expert=expert, homepage=wanted, date=timezone.now(), state='S',
         )
@@ -174,11 +215,15 @@ def certificate_realname(request):
     user = request.user
     if user.has_perm('account.verified_expert_permission') or user.has_perm(
         'account.verified_commuser_permission'):
-        return HttpResponse("你已经认证过了")
+        msg18 = {'msg': "你已经认证过了"}
+        return HttpResponse(json.dumps(msg18), content_type="application/json")
+        # return HttpResponse("你已经认证过了")
     if request.method == 'GET':
         form = RealNameForm()
-        return render(request, 
-                "account/certificate_realname.html", {'form': form, 'invalid': False})    
+        msg19 = {'form': form, 'invalid': False}
+        return HttpResponse(json.dumps(msg19), content_type="application/json")
+        # return render(request,
+                # "account/certificate_realname.html", {'form': form, 'invalid': False})
     else:
         assert request.method == 'POST'
         form = RealNameForm(request.POST, request.FILES)
@@ -188,18 +233,26 @@ def certificate_realname(request):
                 pic=request.FILES['pic'], state='S',
             )
             application.save()
-            return HttpResponse("application commited successfully! please wait for shenhe")
+            msg20 = {'msg': "application commited successfully! please wait for shenhe"}
+            return HttpResponse(json.dumps(msg20), content_type="application/json")
+            # return HttpResponse("application commited successfully! please wait for shenhe")
         else:
             form = RealNameForm()
-            return render(request, "account/certificate_realname.html",
-                            {'form': form, 'invalid': True})
+            msg21 = {'form': form, 'invalid': True}
+            return HttpResponse(json.dumps(msg21), content_type="application/json")
+            # return render(request, "account/certificate_realname.html",
+                            # {'form': form, 'invalid': True})
 
 def invite_register(request, inviter_id):
     if request.method == 'GET':
         inviter = User.objects.filter(id = inviter_id)
         if inviter.count() == 0 or inviter[0].has_perm('account.commuser_permission') == False:
-            return HttpResponse("邀请人不存在")
-        return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err': False})
+            msg22 = {'msg': "邀请人不存在"}
+            return HttpResponse(json.dumps(msg22), content_type="application/json")
+            # return HttpResponse("邀请人不存在")
+        msg23 = {'password_err': False, 'username_err': False}
+        return HttpResponse(json.dumps(msg23), content_type="application/json")
+        # return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err': False})
     elif request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -210,7 +263,9 @@ def invite_register(request, inviter_id):
             search_user = User.objects.get(username = username)
         except Exception:
             if password != password_comfirm:
-                return render(request, 'account/commuser_register.html', {'password_err': True, 'username_err': False})
+                msg24 = {'password_err': True, 'username_err': False}
+                return HttpResponse(json.dumps(msg24), content_type="application/json")
+                # return render(request, 'account/commuser_register.html', {'password_err': True, 'username_err': False})
             inviter = User.objects.get(id = inviter_id)
             with database_transaction.atomic():
                 new_user = User.objects.create_user(username, email = email, password = password)
@@ -224,7 +279,9 @@ def invite_register(request, inviter_id):
                 inviter.commuser_relation.save()
             login(request, new_user)
             return redirect('/account/profile/')
-        return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err' : True})
+        msg25 = {'password_err': False, 'username_err' : True}
+        return HttpResponse(json.dumps(msg25), content_type="application/json")
+        # return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err' : True})
     
 '''
 def create_composition(request):
@@ -266,6 +323,8 @@ def save_display_materials(request, composition):
             description = 'a video',
         )
         video.save()
+
+
 
 def save_uploaded(request, composition):
     save_appendix(request, composition)

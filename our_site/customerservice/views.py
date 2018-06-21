@@ -8,7 +8,7 @@ from django.http import HttpResponse
 from django.db import DatabaseError
 from django.db import transaction as database_transaction
 from account.models import User_Permission, RealNameInfo, Expertuser_relation
-
+import json
 def add_permission(user, permstr):
     content_type = ContentType.objects.get_for_model(User_Permission)
     permission = Permission.objects.get(content_type = content_type, codename = permstr)
@@ -24,12 +24,15 @@ def cs_login(request):
             password = request.POST['password']            
             user = authenticate(request, username=username, password=password)
             if user is None:
-                return HttpResponse("username or password error")
+                msg0 = {'msg': "username or password error"}
+                return HttpResponse(json.dumps(msg0), content_type="application/json")
+
 
             try:
                 servant = user.customerservice
             except CustomerService.DoesNotExist:
-                return HttpResponse("the user name exists, but you are not a admin")
+                msg0 = {'msg': "the user name exists, but you are not a admin"}
+                return HttpResponse(json.dumps(msg0), content_type="application/json")
 
             login(request, user)            
             return redirect('/customerservice/affairs/')
@@ -39,23 +42,29 @@ def cs_login(request):
 
 def cs_register(request):
     if request.method == 'GET':
-        return render(request, 'customerservice/register.html', 
-                        {'password_err': False, 'dupusername': False})
+        msg1 = {'password_err': False, 'dupusername': False}
+        return HttpResponse(json.dumps(msg1), content_type="application/json")
+        # return render(request, 'customerservice/register.html',
+                        # {'password_err': False, 'dupusername': False})
     else:
         assert request.method == 'POST'        
         username = request.POST['username']
         password = request.POST['password']
         password_confirm = request.POST['password_confirm']
         if password != password_confirm:
-            return render(request, 'customservice/register.html', 
-                            {'password_err': True, 'dupusername': False})
+            msg2 = {'password_err': True, 'dupusername': False}
+            return HttpResponse(json.dumps(msg2), content_type="application/json")
+            # return render(request, 'customservice/register.html',
+                           # {'password_err': True, 'dupusername': False})
         email = request.POST['email']
         with database_transaction.atomic():
             try:
                 user = User.objects.create_user(username, password=password, email=email)
             except DatabaseError as e:
-                return render(request, 'customerservice/register.html', 
-                                {'password_err': False, 'dupusername': True})
+                msg3 = {'password_err': False, 'dupusername': True}
+                return HttpResponse(json.dumps(msg3), content_type="application/json")
+                # return render(request, 'customerservice/register.html',
+                                # {'password_err': False, 'dupusername': True})
             add_permission(user, 'service_permission')
             servant = CustomerService()
             servant.user = user
@@ -70,7 +79,9 @@ def affairs(request):
     if not request.user.is_authenticated:
         return redirect("/customerservice/login/")
     if not request.user.has_perm('account.service_permission'):
-        return HttpResponse("You don't have admin permission!!!")
+        msg4 = {'msg':"You don't have admin permission!!!"}
+        return HttpResponse(json.dumps(msg4), content_type="application/json")
+        # return HttpResponse("You don't have admin permission!!!")
 
     hptodos = ApplicationForHomepageClaiming.objects.filter(state='S')
     rntodos = ApplicationForRealNameCertification.objects.filter(state='S')
@@ -101,7 +112,9 @@ def homepageclaiming_reject(request, appid):
             app.save()
         return redirect("/customerservice/affairs/")
     else:
-        return HttpResponse("How could you get here?")
+        msg5 = {'msg': "How could you get here?"}
+        return HttpResponse(json.dumps(msg5), content_type="application/json")
+        # return HttpResponse("How could you get here?")
 
 def realnamecertification_accept(request, appid):
     with database_transaction.atomic():
@@ -112,7 +125,9 @@ def realnamecertification_accept(request, appid):
         elif user.has_perm('account.commuser_permission'):            
             add_permission(user, 'verified_commuser_permission')
         else:
-            return HttpResponse("fuck who you are?????????")
+            msg6 = {'msg': "fuck who you are?????????"}
+            return HttpResponse(json.dumps(msg6), content_type="application/json")
+            # return HttpResponse("fuck who you are?????????")
         user.save()
         realname_info = RealNameInfo()
         realname_info.user = user
@@ -131,7 +146,9 @@ def realnamecertification_reject(request, appid):
         app.save()
         return redirect("/customerservice/affairs/")
     else:
-        return HttpResponse("How could you get here?")
+        msg7 = {'commuser': "How could you get here?"}
+        return HttpResponse(json.dumps(msg7), content_type="application/json")
+        # return HttpResponse("How could you get here?")
 
         
 

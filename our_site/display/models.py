@@ -5,13 +5,11 @@ from account.models import Expertuser_relation
 class Keyword(models.Model):
     word = models.CharField(max_length=100)
 
-
 class StudyArea(models.Model):
     Area_name = models.CharField(max_length=255)
 
 class Institute(models.Model):
     inst_name = models.CharField(max_length=255)
-
 
 class ExpertDetail(models.Model):
     # a primary key defined in order to avoid repeating
@@ -19,8 +17,11 @@ class ExpertDetail(models.Model):
     name = models.CharField(max_length=100) #find a name length 68!
     account = models.OneToOneField(Expertuser_relation, on_delete=models.SET_NULL, null=True)
     institute = models.ForeignKey(Institute, related_name="members", on_delete = models.SET_NULL, null = True)
+    def natural_key(self):
+        return (self.custompk, self.name)
     class Meta:
         unique_together=('name', 'institute')
+
 
 class Paper(models.Model):
     id = models.CharField(max_length=40, primary_key=True)
