@@ -46,13 +46,26 @@ def send_message(request):
 
 @login_required(login_url='/account/login/')
 def read_message(request):
-    message_list = Inbox.objects.filter(inbox_receiver=request.user)
+    # message_list = Inbox.objects.filter(inbox_receiver=request.user)
     '''
     template = loader.get_template('message/read_message.html')
     context = {
-        'message_list': message_list
+        'message_list':
     }
     '''
-    json_data = serializers.serialize("json", Inbox.objects.filter(inbox_receiver=request.user))
-    return HttpResponse(json_data, content_type="application/json")
+    messages = Inbox.objects.filter(inbox_receiver=request.user)
+    li = []
+    for m in messages:
+        obj = {
+            'inbox_id' : m.inbox_id,
+            'inbox_date' : m.inbox_date,
+            'inbox_sender' : m.inbox_sender,
+            'inbox_receiver' : m.inbox_receiver,
+            'inbox_content' : m.inbox_content,
+        }
+        li.append(obj)
+
+    # json_data = serializers.serialize("json", Inbox.objects.filter(inbox_receiver=request.user))
+    #return HttpResponse(json_data, content_type="application/json")
     # return HttpResponse(template.render(context, request))
+    return HttpResponse(json.dumps(li), content_type="application/json")
