@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 import nltk
-from display.models import Paper
+from display.models import *
 from django.db.models import Q, F
 from django.core import serializers
 import json
+from django.db.models import Count
 
 def relation_add(relations, paper):
     if paper.pk in relations:
@@ -34,8 +35,9 @@ def search(request):
     return render(request, 'search/search.html')
 
 
-def search_list(request, page = 0):
+def search_list(request):
     choice = request.GET['search_type']
+    page = int(request.GET['page'])
     if choice == 'simple':
         text_list = nltk.word_tokenize(request.GET['simple_search'])
         order = request.GET['order']
@@ -59,7 +61,7 @@ def search_list(request, page = 0):
         related_paper = related_paper[20*page:20*(1+page)]
         
         
-        json_data = ''
+        data = []
         for paper in related_paper:
             js = {
                 'title' : paper.title, 'paper_id' : paper.id, 'year': paper.year,
@@ -69,8 +71,9 @@ def search_list(request, page = 0):
             for author in paper.authors.all():
                 js['authors'].append({
                     'name' : author.name, 'id': author.custompk,
-                })
-            json_data += (json.dumps(js)) +  '\n'
+            })
+            data.append(js)
+        json_data = json.dumps(data)
         '''
         with open('/home/elin/file.json', 'w') as out:
             out.write(json_data)
@@ -84,8 +87,8 @@ def search_list(request, page = 0):
         author = request.GET['author']
         doc_type = request.GET['type']
         publisher = request.GET['publisher']
-        start_year = request.GET['start_year']
-        end_year = request.GET['end_year']
+        start_year = int(request.GET['start_year'])
+        end_year = int(request.GET['end_year'])
         keywords = request.GET['keyword'].strip(' ').split(',')
         keywords = list(set(keywords)) # unique
         # print(keywords)
@@ -138,7 +141,7 @@ def search_list(request, page = 0):
         if all_empty == True:
             return redirect('/search/')
         
-        json_data = ''
+        data = []
         for paper in related_paper:
             js = {
                 'title' : paper.title, 'paper_id' : paper.id, 'year': paper.year,
@@ -148,8 +151,29 @@ def search_list(request, page = 0):
             for author in paper.authors.all():
                 js['authors'].append({
                     'name' : author.name, 'id': author.custompk,
-                })
-            json_data += (json.dumps(js)) +  '\n'
+            })
+            data.append(js)
+        json_data = json.dumps(data)
         
         return HttpResponse(json_data, content_type="application/json")
         # return render(request, 'search/search_list.html', {'paper_list' : paper_list})
+
+def heat_analysis(request):
+    #在这里需要返回 最火的filed 和 最火的paper
+    area_list = StudyArea.objects.annotate(num_paper = Count('related_paper')).order_by('-num_paper')[:5]
+    paper_list = Paper.objects.all().order_by('-n_citation')[:5]
+    data = {
+        'area_list' : list(),
+        'paper_list' : list(),
+    }
+    for area in area_list:
+        data['area_list'].append(
+            {'area_name' : area.Area_name}
+        )
+    
+    for paper in paper_list:
+        data['paper_list'].append(
+            {'title': paper.title, 'paper_id' : paper.id, 'n_citation': paper.n_citation}
+        )
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type="application/json")

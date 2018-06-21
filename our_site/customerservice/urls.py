@@ -4,7 +4,6 @@ from . import views
 appname = 'customerservice'
 
 urlpatterns = [
-    path('register/', views.cs_register, name='register'),
     path('login/', views.cs_login, name='login'),
     path('affairs/', views.affairs, name='affairs'),
     path('homepageclaiming/<int:appid>/accept/', views.homepageclaiming_accept,
