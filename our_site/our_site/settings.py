@@ -86,7 +86,11 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'oursite',
         'USER': 'root',
+<<<<<<< HEAD
         'PASSWORD': 'cenyi123',
+=======
+        'PASSWORD': '78780905mariaroot',
+>>>>>>> 为了下载新代码提交
         'HOST': '127.0.0.1',
         'PORT': '3306',
     }

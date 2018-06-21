@@ -13,10 +13,9 @@ from display.models import *
 import json
 from django.http import HttpResponse
 from django.utils import timezone
-from display.models import ExpertDetail
 from customerservice.models import ApplicationForHomepageClaiming, ApplicationForRealNameCertification
-
 from .forms import *
+from django.core import serializers
 
 
 def account_index(request):
@@ -88,28 +87,30 @@ def commuser_login(request):
 
 @login_required(login_url = '/account/login/')
 def commuser_profile(request):
+    jsondict = {
+        'userpk': request.user.pk,
+        'username': request.user.username,        
+    }
+    try:
+        realnameinfo = request.user.realnameinfo
+        jsondict['realname'] = realnameinfo.name
+    except RealNameInfo.DoesNotExist:
+        pass
+
     if request.user.has_perm('account.commuser_permission'):
         commuser = request.user.commuser_relation
-        try:
-            realnameinfo = request.user.realnameinfo
-            msg6 = {'commuser' : commuser, 'realnameinfo': realnameinfo}
-            return HttpResponse(json.dumps(msg6), content_type="application/json")
-          #  return render(request, 'account/commuser_profile.html',
-           #         {'commuser' : commuser, 'realnameinfo': realnameinfo})
-        except RealNameInfo.DoesNotExist:
-            msg7 = {'commuser' : commuser, 'realnameinfo': None}
-            return HttpResponse(json.dumps(msg7), content_type="application/json")
-            # return render(request, 'account/commuser_profile.html',
-                    # {'commuser' : commuser, 'realnameinfo': None})
-        
+        jsondict['isexpert'] = False
+        jsondict['credit'] = commuser.credit                
     elif request.user.has_perm('account.expert_permission'):
         expert = request.user.expertuser_relation
-        msg8 = {'isexpert': True, 'expert': expert}
-        return HttpResponse(json.dumps(msg8), content_type="application/json")
-        # return render(request, 'account/expert_profile.html',
-                    # {'isexpert': True, 'expert': expert})
+        jsondict['isexpert'] = True
+        try:
+            homepage = expert.expertdetail
+        except ExpertDetail.DoesNotExist:
+            pass
     else:
-        return HttpResponse("error page")
+        assert False
+    return HttpResponse(json.dumps(jsondict), content_type="application/json")
 
 #this is a common way for both commuser and expert
 def user_logout(request):
