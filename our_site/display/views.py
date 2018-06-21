@@ -31,8 +31,10 @@ def expert_detail(request,id):
                 cooperation_name.append(author.name)
 
     paper_id_list=[]
+    paper_title_list=[]
     for paper in paper_list:
         paper_id_list.append(paper.id)
+        paper_title_list.append(paper.title)
 
     studyarea_name = []
     for paper in paper_list:
@@ -44,7 +46,7 @@ def expert_detail(request,id):
     j_str={'expert_name':name,'expert_institute':institute,'count_journal':count_journal,
            'count_conference':count_conference,'count_book':count_book,'count_other':count_other,
            'count_paper':count_paper,'count_citation':count_citation,'cooperation_id':cooperation_id,
-           'cooperation_name':cooperation_name,'paper_id_list':paper_id_list,'studyarea_name':studyarea_name}
+           'cooperation_name':cooperation_name,'paper_id_list':paper_id_list,'paper_title_list':paper_title_list,'studyarea_name':studyarea_name}
 
     return HttpResponse(json.dumps(j_str), content_type="application/json")
 
@@ -86,8 +88,8 @@ def paper_detail(request,id):
     abstract=paper.abstract
     count_citation=paper.n_citation
     references=(paper.references)
-
-    j_str={'author_id':author_id,'author_name':author_name,'abstract':abstract,'keywords':keywords_name,
+    paper_title=paper.title
+    j_str={'paper_title':paper_title,'author_id':author_id,'author_name':author_name,'abstract':abstract,'keywords':keywords_name,
            'study_area':studyarea_name,'count_citation':count_citation,'references':references}
 
     return HttpResponse(json.dumps(j_str), content_type="application/json")
