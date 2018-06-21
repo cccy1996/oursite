@@ -6,7 +6,7 @@ import json
 
 def expert_detail(request,id):
     #expert_account=request.user.expertuser_relation
-    expert=ExpertDetail.objects.get(account=id)
+    expert=ExpertDetail.objects.get(custompk=id)
     name=expert.name
     institute=expert.institute.inst_name
     paper_list = expert.papers.all()

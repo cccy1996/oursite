@@ -6,6 +6,7 @@ from django.db.models import Q, F
 from django.core import serializers
 import json
 from django.db.models import Count
+import math
 
 def relation_add(relations, paper):
     if paper.pk in relations:
@@ -37,7 +38,11 @@ def search(request):
 
 def search_list(request):
     choice = request.GET['search_type']
-    page = int(request.GET['page'])
+    try:
+        page = int(request.GET['page'])
+    except KeyError:
+        page = 1
+
     if choice == 'simple':
         text_list = nltk.word_tokenize(request.GET['simple_search'])
         order = request.GET['order']
@@ -58,6 +63,7 @@ def search_list(request):
             related_paper.sort(key = lambda x : x.year, reverse = True)
         else:
             pass
+        npages = len(related_paper) // 20 + 1
         related_paper = related_paper[20*page:20*(1+page)]
         
         
@@ -73,7 +79,8 @@ def search_list(request):
                     'name' : author.name, 'id': author.custompk,
             })
             data.append(js)
-        json_data = json.dumps(data)
+        pageddata = {'data': data, 'pages': npages,}
+        json_data = json.dumps(pageddata)
         '''
         with open('/home/elin/file.json', 'w') as out:
             out.write(json_data)
@@ -83,29 +90,39 @@ def search_list(request):
         #return render(request, 'search/search_list.html', {'paper_list' : related_paper})
     else:
         all_empty = True
-        order = request.GET['order']
-        author = request.GET['author']
-        doc_type = request.GET['type']
-        publisher = request.GET['publisher']
-        start_year = int(request.GET['start_year'])
-        end_year = int(request.GET['end_year'])
-        keywords = request.GET['keyword'].strip(' ').split(',')
-        keywords = list(set(keywords)) # unique
+        order = request.GET['order'].strip(' ')
+        author = request.GET['author'].strip(' ')
+        doc_type = request.GET['type'].strip(' ')
+        publisher = request.GET['publisher'].strip(' ')
+        try:
+            start_year = int(request.GET['start_year'])
+        except ValueError:
+            start_year = 0
+        try:
+            end_year = int(request.GET['end_year'])
+        except ValueError:
+            end_year = 2100
+        keywordstr = request.GET['keyword'].strip(' ')
+        if len(keywordstr) > 0:
+            keywords = keywordstr.split(',')
+            keywords = list(set(keywords)) # unique
+            hit_times = dict()
+            paper_list = Paper.objects.none()
+            for kwd in keywords:
+                papers = Paper.objects.filter(Q(keywords__word__iexact = kwd) 
+                        | Q(chunkfromtitle__chunk__iexact = kwd)).distinct()
+                for p in papers:
+                    if p.pk in hit_times:
+                        hit_times[p.pk] += 1
+                    else:
+                        hit_times[p.pk] = 1
+                paper_list = paper_list.union(papers)
+        else:
+            keywords = []
+            paper_list = Paper.objects.all()
         # print(keywords)
 
-        hit_times = dict()
-        paper_list = Paper.objects.none()
-        for kwd in keywords:
-            papers = Paper.objects.filter(Q(keywords__word__icontains = kwd) 
-                        | Q(chunkfromtitle__chunk__icontains = kwd)).distinct()
-            for p in papers:
-                if p in hit_times:
-                    hit_times[p.pk] += 1
-                else:
-                    hit_times[p.pk] = 1
-            paper_list = paper_list.union(papers)
-
-        if request.GET['keyword'] != '':
+        if len(keywordstr) > 0:
             all_empty = False
 
         if author != '':
@@ -130,13 +147,20 @@ def search_list(request):
             paper_list = paper_list.filter(year__gte = start_year)
         
         # it's not a queryset anymore
-        paper_list = sorted(paper_list, key=lambda x: hit_times[x.pk], reverse=True)
-        if order == 'citation':
-            paper_list.sort(key = lambda x : x.n_citation if x.n_citation is not None else 0, reverse = True)
-        elif order == 'year':
-            paper_list.sort(key = lambda x : x.year, reverse = True)
-            
-        paper_list = paper_list[20*page:20*(1+page)]
+        if len(keywordstr) > 0:
+            paper_list = sorted(paper_list, key=lambda x: hit_times[x.pk], reverse=True)
+            if order == 'citation':
+                paper_list.sort(key = lambda x : x.n_citation if x.n_citation is not None else 0, reverse = True)
+            elif order == 'year':
+                paper_list.sort(key = lambda x : x.year, reverse = True)
+        else:
+            if order == 'citation':
+                paper_list = paper_list.order_by('-n_citation')
+            elif order == 'year':
+                paper_list = paper_list.order_by('-year')
+        
+        npages = len(paper_list)//20 + 1
+        related_paper = paper_list[20*page:20*(1+page)]
     
         if all_empty == True:
             return redirect('/search/')
@@ -153,7 +177,8 @@ def search_list(request):
                     'name' : author.name, 'id': author.custompk,
             })
             data.append(js)
-        json_data = json.dumps(data)
+        pageddata = {'data': data, 'pages': npages,}
+        json_data = json.dumps(pageddata)
         
         return HttpResponse(json_data, content_type="application/json")
         # return render(request, 'search/search_list.html', {'paper_list' : paper_list})
