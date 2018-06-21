@@ -16,16 +16,35 @@ def expert_detail(request,id):
     count_other=paper_list.exclude(doc_type__in=['Journal', 'Conference', 'Book']).count()
     count_paper=paper_list.all().count()
     count_citation=paper_list.all().aggregate(count_citation=Sum('n_citation')).get('count_citation')
-    cooperation = []
+    cooperation_id = []
     for paper in paper_list:
         authors = paper.authors.all().exclude(name=name)
         for author in authors:
-            if author not in cooperation:
-                cooperation.append(author.name)
+            if author not in cooperation_id:
+                cooperation_id.append(author.custompk)
+
+    cooperation_name = []
+    for paper in paper_list:
+        authors = paper.authors.all().exclude(name=name)
+        for author in authors:
+            if author not in cooperation_name:
+                cooperation_name.append(author.name)
+
+    paper_id_list=[]
+    for paper in paper_list:
+        paper_id_list.append(paper.id)
+
+    studyarea_name = []
+    for paper in paper_list:
+        studyareas=paper.fos.all()
+        for studyarea in studyareas:
+            if studyarea not in studyarea_name:
+                studyarea_name.append(studyarea.Area_name)
 
     j_str={'expert_name':name,'expert_institute':institute,'count_journal':count_journal,
            'count_conference':count_conference,'count_book':count_book,'count_other':count_other,
-           'count_paper':count_paper,'count_citation':count_citation,'cooperation':cooperation}
+           'count_paper':count_paper,'count_citation':count_citation,'cooperation_id':cooperation_id,
+           'cooperation_name':cooperation_name,'paper_id_list':paper_id_list,'studyarea_name':studyarea_name}
 
     return HttpResponse(json.dumps(j_str), content_type="application/json")
 
@@ -45,6 +64,13 @@ def paper_detail(request,id):
         if author not in author_name:
             author_name.append(author.name)
 
+    author_id = []
+    for paper in paper_list:
+        authors = paper.authors.all()
+        for author in authors:
+            if author not in author_id:
+                author_id.append(author.custompk)
+
     keywords=paper.keywords.all()
     keywords_name = []
     for keyword in keywords:
@@ -61,7 +87,7 @@ def paper_detail(request,id):
     count_citation=paper.n_citation
     references=(paper.references)
 
-    j_str={'authors':author_name,'abstract':abstract,'keywords':keywords_name,
+    j_str={'author_id':author_id,'author_name':author_name,'abstract':abstract,'keywords':keywords_name,
            'study_area':studyarea_name,'count_citation':count_citation,'references':references}
 
     return HttpResponse(json.dumps(j_str), content_type="application/json")
