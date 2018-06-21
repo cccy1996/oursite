@@ -9,6 +9,11 @@ from django.db import DatabaseError
 from django.db import transaction as database_transaction
 from account.models import User_Permission, RealNameInfo, Expertuser_relation
 import json
+from message.models import Inbox
+
+def send_message(sender, to, content):
+    Inbox.objects.create(inbox_date=timezone.now(), inbox_sender=sender, 
+                         inbox_reciever=to, inbox_content=content)
 
 def add_permission(user, permstr):
     content_type = ContentType.objects.get_for_model(User_Permission)
@@ -86,6 +91,7 @@ def homepageclaiming_accept(request, appid):
         homepage.save()        
         app.state = 'P'
         app.save()
+        send_message(request.user, expert.user, '尊敬的用户：您的主页认领申请已经通过！赶快查看吧！')
     return redirect("/customerservice/affairs/")
 
 def homepageclaiming_reject(request, appid):
@@ -96,6 +102,8 @@ def homepageclaiming_reject(request, appid):
             reason = request.POST['reason']
             app.reject_reason = reason
             app.save()
+            send_message(request.user, app.expert.user, 
+                    '尊敬的用户：您的主页认领申请被拒绝，理由是：{0}'.format(reason))
         return redirect("/customerservice/affairs/")
     else:
         raise Http404('')
@@ -105,13 +113,13 @@ def realnamecertification_accept(request, appid):
     with database_transaction.atomic():
         app = ApplicationForRealNameCertification.objects.get(pk=appid)
         user = app.user
+
         if user.has_perm('account.expert_permission'):            
             add_permission(user, 'verified_expert_permission')
         elif user.has_perm('account.commuser_permission'):            
             add_permission(user, 'verified_commuser_permission')
         else:
-            msg6 = {'msg': "fuck who you are?????????"}
-            return HttpResponse(json.dumps(msg6), content_type="application/json")
+            assert False
             # return HttpResponse("fuck who you are?????????")
         user.save()
         realname_info = RealNameInfo()
@@ -121,6 +129,7 @@ def realnamecertification_accept(request, appid):
         realname_info.save()
         app.state = 'P'
         app.save()
+        send_message(request.user, expert.user, '尊敬的用户：您的实名认证申请已经通过！赶快查看吧！')
     return redirect("/customerservice/affairs/")
 
 def realnamecertification_reject(request, appid):
@@ -129,6 +138,8 @@ def realnamecertification_reject(request, appid):
         app.state = 'R'
         app.reject_reason = request.POST['reason']
         app.save()
+        send_message(request.user, app.expert.user, 
+                    '尊敬的用户：您的实名申请申请被拒绝，理由是：{0}'.format(app.reject_reason))
         return redirect("/customerservice/affairs/")
     else:
         msg7 = {'commuser': "How could you get here?"}
