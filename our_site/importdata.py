@@ -83,11 +83,17 @@ def add_references(paper, data):
 def add_page_start(paper, data):
     if 'page_start' not in data:
         return
-    paper.page_start = int(data['page_start'])
+    try:
+        paper.page_start = int(data['page_start'])
+    except ValueError:
+        raise ValueError
 def add_page_end(paper, data):
     if 'page_end' not in data:
         return
-    paper.page_end = int(data['page_end'])
+    try:
+        paper.page_end = int(data['page_end'])
+    except ValueError:
+        raise ValueError
 def add_doc_type(paper, data):
     if 'doc_type' not in data:
         return
@@ -165,8 +171,11 @@ def main(data_path, lines):
                 add_venue(paper, data)
                 add_n_citation(paper, data)
                 add_references(paper, data)
-                add_page_start(paper, data)
-                add_page_end(paper, data)
+                try:
+                    add_page_start(paper, data)
+                    add_page_end(paper, data)
+                except ValueError:
+                    pass
                 add_doc_type(paper, data)
                 add_lang(paper, data)
                 add_publisher(paper, data)

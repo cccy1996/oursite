@@ -1,4 +1,4 @@
-<form method="GET" action="{% url 'search:search_list' 1 %}">
+<form method="GET" action="{% url 'search:search_list' %}">
     {% csrf_token %}
     <input type="radio" checked="checked" name="search_type" value="simple">精简搜索<br>
     主题:<input type="text" name="simple_search"><br>
