@@ -41,7 +41,7 @@ def search_list(request):
     try:
         page = int(request.GET['page'])
     except KeyError:
-        page = 1
+        page = 0
 
     if choice == 'simple':
         text_list = nltk.word_tokenize(request.GET['simple_search'])
@@ -109,8 +109,8 @@ def search_list(request):
             hit_times = dict()
             paper_list = Paper.objects.none()
             for kwd in keywords:
-                papers = Paper.objects.filter(Q(keywords__word__iexact = kwd) 
-                        | Q(chunkfromtitle__chunk__iexact = kwd)).distinct()
+                papers = Paper.objects.filter(Q(keywords__word__icontains = kwd) 
+                        | Q(chunkfromtitle__chunk__icontains = kwd)).distinct()
                 for p in papers:
                     if p.pk in hit_times:
                         hit_times[p.pk] += 1

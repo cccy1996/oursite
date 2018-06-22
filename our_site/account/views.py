@@ -16,12 +16,13 @@ from django.utils import timezone
 from customerservice.models import ApplicationForHomepageClaiming, ApplicationForRealNameCertification
 from .forms import *
 from django.core import serializers
+from django.views.decorators.csrf import csrf_exempt
 
 
 def account_index(request):
    return render(request, 'account/index.html')
 
-
+@csrf_exempt
 def commuser_register(request):
     if request.method == 'GET':
         msg1 = {'password_err': False, 'username_err': False}
@@ -31,7 +32,7 @@ def commuser_register(request):
     elif request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
-        password_comfirm = request.POST['password_comfirm']
+        password_comfirm = request.POST['password_confirm']
         email = request.POST['email']
         
         try:
@@ -58,7 +59,7 @@ def commuser_register(request):
         return HttpResponse(json.dumps(msg3), content_type="application/json")
         # return render(request, 'account/commuser_register.html', {'password_err': False, 'username_err' : True})
 
-
+@csrf_exempt
 def commuser_login(request):
     if request.method  == 'GET':
         if request.user.is_authenticated:
@@ -118,6 +119,7 @@ def user_logout(request):
     logout(request)
     return redirect('/account')
 
+@csrf_exempt
 @login_required(login_url = '/account/login/')
 def user_change_password(request):
     if request.method == 'GET':
@@ -143,6 +145,7 @@ def user_change_password(request):
         else:
             return render(request, 'account/change_password.html', { 'old_password_err' : True, 'new_password_err' : False})
 
+@csrf_exempt
 def expert_register(request):
     if request.method == 'GET':
         msg11 ={'password_err': False, 'username_err': False, 'identity_err': False}

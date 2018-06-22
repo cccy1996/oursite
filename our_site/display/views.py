@@ -51,42 +51,38 @@ def expert_detail(request,id):
     return HttpResponse(json.dumps(j_str), content_type="application/json")
 
 def paper_detail(request,id):
-    expert_account = request.user.expertuser_relation
-    expert=ExpertDetail.objects.get(account=expert_account)
-    paper_list = expert.papers.all()
-
+    #expert_account = request.user.expertuser_relation
+    #expert=ExpertDetail.objects.get(custompk=expert_account)
+    paper_list = Paper.objects.all()
     try:
-        paper=paper_list.get(id=id)
+        paper=Paper.objects.get(pk=id)
     except Paper.DoesNotExist:
         return HttpResponse('Paper does not exist!')
 
     authors=paper.authors.all()
     author_name = []
     for author in authors:
-        if author not in author_name:
-            author_name.append(author.name)
+        author_name.append(author.name)
 
     author_id = []
-    for paper in paper_list:
-        authors = paper.authors.all()
-        for author in authors:
-            if author not in author_id:
-                author_id.append(author.custompk)
+    for author in authors:
+        author_id.append(author.custompk)
 
     keywords=paper.keywords.all()
     keywords_name = []
     for keyword in keywords:
-        if keyword not in keywords_name:
-            keywords_name.append(keyword.word)
+        keywords_name.append(keyword.word)
 
     studyareas=paper.fos.all()
     studyarea_name = []
     for studyarea in studyareas:
-        if studyarea not in studyarea_name:
-            studyarea_name.append(studyarea.Area_name)
+        studyarea_name.append(studyarea.Area_name)
 
     abstract=paper.abstract
-    count_citation=paper.n_citation
+    if paper.n_citation is not None:
+        count_citation = paper.n_citation
+    else:
+        count_citation = 0
     references=(paper.references)
     paper_title=paper.title
     j_str={'paper_title':paper_title,'author_id':author_id,'author_name':author_name,'abstract':abstract,'keywords':keywords_name,

@@ -146,6 +146,7 @@ def add_abstract(paper, data):
 
 def main(data_path, lines):
     json_file = open(data_path, 'r', 1)
+    parser = chunksgen.make_parser()
     for i in range(lines):
         print('read line ', i)
         text = json_file.readline()
@@ -186,6 +187,13 @@ def main(data_path, lines):
                 add_url(paper, data)
                 add_abstract(paper, data)
                 paper.save()
+
+                s = chunksgen.chunks_from_title(paper.title, parser)
+                for c in s:
+                    try:
+                        ChunkFromTitle.objects.create(chunk=c, paper=paper)
+                    except IntegrityError:
+                        pass
         except TooLongException:
             pass #跳过这行json
     json_file.close()
@@ -202,6 +210,6 @@ if __name__ == "__main__":
         )
     data_path = '/home/shiletong/mag_papers_8/mag_papers_166.txt'
     main(data_path, 19000)
-    print('Begin to generate chunks for titles...')
-    chunksgen.gen_for_all()
+    #print('Begin to generate chunks for titles...')
+    #chunksgen.gen_for_all()
     print('Done!')
